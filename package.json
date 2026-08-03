@@ -1,0 +1,14 @@
+{
+  "name": "seu-campus-map-agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "东南大学校园地图与智能指南 Demo",
+  "scripts": {
+    "start": "node server.mjs",
+    "check": "node --check server.mjs && node --check app.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

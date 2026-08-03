@@ -1,0 +1,39 @@
+window.MAP_FEATURES = [
+  { id: "library", name: "四牌楼校区图书馆", category: "study", icon: "书", x: 46, y: 39, lat: 32.05818, lng: 118.78672, location: "主教学区中央", hours: "工作日 08:00-22:00；考试周至23:00", status: "open", verified: false, tags: ["自习", "借还书", "研讨空间", "打印", "AED"], description: "1F-3F设自习室，1F设103协同空间；4F-7F为书库。" },
+  { id: "zhongshan", name: "中山院", category: "study", icon: "学", x: 44, y: 57, lat: 32.05695, lng: 118.78648, location: "主教学区南部", hours: "07:00-22:00", status: "open", verified: false, tags: ["教室", "打印", "饮水", "AED", "一卡通补办"], description: "可通过数智东南查询空教室；一楼设一卡通自助补办设备。" },
+  { id: "dongnan", name: "东南院", category: "study", icon: "学", x: 57, y: 56, lat: 32.05704, lng: 118.78772, location: "主教学区东南侧", hours: "07:00-22:00", status: "open", verified: false, tags: ["教室", "卫生间"], description: "教学楼之一，指南建议通过数智东南查询空教室。" },
+  { id: "stadium", name: "四牌楼校区体育场", category: "sports", icon: "跑", x: 31, y: 31, lat: 32.05916, lng: 118.78496, location: "主教学区西北侧", hours: "08:00-22:00", status: "open", verified: false, tags: ["跑步", "400米跑道", "免费"], description: "跑操使用“东南大学体育管理”小程序拍照打卡。" },
+  { id: "gym", name: "体育馆", category: "sports", icon: "体", x: 37, y: 38, lat: 32.05838, lng: 118.78551, location: "体育场附近", hours: "09:00-21:00", status: "open", verified: false, tags: ["羽毛球", "乒乓球", "健身", "网球", "AED"], description: "多数场地通过数智东南预约，部分项目收费。" },
+  { id: "shatang-canteen", name: "沙塘园食堂", category: "dining", icon: "食", x: 34, y: 69, lat: 32.05555, lng: 118.78547, location: "沙塘园宿舍区北侧", hours: "06:30-09:30 / 11:00-13:00 / 17:00-19:00", status: "closed", verified: false, tags: ["早餐", "民族餐厅", "烘焙", "咖啡"], description: "两层、十余个窗口；早餐仅供应大伙窗口。" },
+  { id: "shatang-dorm", name: "沙塘园宿舍区", category: "dorm", icon: "宿", x: 73, y: 72, lat: 32.05536, lng: 118.78853, location: "校园东南部", hours: "大门00:00-05:00只进不出", status: "open", verified: false, tags: ["1舍", "2舍", "3舍", "门禁", "洗浴"], description: "1/2/3舍为上床下桌四人间，楼层独立隔间公共卫浴。" },
+  { id: "chengyuan-dorm", name: "成园宿舍区", category: "dorm", icon: "宿", x: 80, y: 65, lat: 32.05602, lng: 118.78909, location: "沙塘园东侧", hours: "热水07:00-次日01:00", status: "open", verified: false, tags: ["1舍", "2舍", "独立卫浴", "门禁"], description: "成园1/2舍为上床下桌四人间，独立卫浴。" },
+  { id: "west-dorm", name: "校西宿舍区", category: "dorm", icon: "宿", x: 8, y: 43, lat: 32.05779, lng: 118.78115, location: "进香河路以西", hours: "热水07:00-次日01:00", status: "open", verified: false, tags: ["群英楼", "荟萃楼", "学府二舍"], description: "包含群英楼、荟萃楼与学府二舍，床铺约2×0.9米。" },
+  { id: "xiangyuan", name: "香园食堂", category: "dining", icon: "食", x: 8, y: 56, lat: 32.05682, lng: 118.78117, location: "校西宿舍区", hours: "06:30-09:30 / 11:00-13:00 / 16:30-19:00", status: "closed", verified: false, tags: ["食堂", "早餐"], description: "校西宿舍区主要食堂。" },
+  { id: "wenchang-dorm", name: "文昌桥宿舍区", category: "dorm", icon: "宿", x: 90, y: 47, lat: 32.05755, lng: 118.79123, location: "太平北路东侧", hours: "部分楼栋设围合门禁", status: "open", verified: false, tags: ["6-16舍", "宿舍", "莘园食堂"], description: "不同楼栋床型、人数与卫浴条件差异较大，详情请进入宿舍主题。" },
+  { id: "xinyuan", name: "莘园食堂", category: "dining", icon: "食", x: 91, y: 58, lat: 32.05649, lng: 118.79136, location: "文昌桥宿舍区", hours: "06:40-09:00 / 11:00-13:00 / 17:00-19:00", status: "closed", verified: false, tags: ["食堂", "早餐"], description: "文昌桥宿舍区食堂。" },
+  { id: "security", name: "保卫处", category: "office", icon: "办", x: 58, y: 67, lat: 32.05579, lng: 118.78783, location: "沙塘园入口处保卫楼", hours: "待核验", status: "unknown", verified: false, tags: ["校园安全", "行政窗口"], description: "负责校园安全相关事务。" },
+  { id: "finance", name: "财务处", category: "office", icon: "办", x: 63, y: 36, lat: 32.05843, lng: 118.78803, location: "微波楼202/204", hours: "待核验", status: "unknown", verified: false, tags: ["缴费", "报销"], description: "报销材料投递位于微波楼1楼自助机附近。" },
+  { id: "campus-hospital", name: "东南大学校医院", category: "medical", icon: "医", x: 83, y: 34, lat: 32.05879, lng: 118.78953, location: "成贤街附近", hours: "工作日09:00-11:30 / 14:00-17:00", status: "closed", verified: false, tags: ["门诊", "医疗"], description: "提供基本门诊；指南建议紧急情况优先考虑鼓楼医院。" },
+  { id: "fuzimiao-metro", name: "浮桥地铁站", category: "transport", icon: "地", x: 78, y: 91, lat: 32.05383, lng: 118.7902, location: "校园南侧", hours: "3号线约06:01-23:49", status: "open", verified: false, tags: ["地铁3号线", "南京南站", "南京站"], description: "从南门或东门步行约5分钟，具体入口与时间待核验。" },
+  { id: "jimingsi-metro", name: "鸡鸣寺地铁站", category: "transport", icon: "地", x: 79, y: 10, lat: 32.06267, lng: 118.79051, location: "校园东北侧", hours: "3/4号线约06:04-23:51", status: "open", verified: false, tags: ["地铁3号线", "地铁4号线"], description: "可前往九龙湖校区、南京南站和南京站。" },
+  { id: "zhenxiang", name: "蓁巷餐饮街区", category: "nearby", icon: "吃", x: 24, y: 78, lat: 32.05463, lng: 118.78386, location: "毗邻沙塘园", hours: "部分早餐06:00起；烧烤约17:00-02:00", status: "open", verified: false, tags: ["早餐", "烧烤", "麻辣烫", "夜宵"], description: "早餐和夜宵选择集中，指南提示早高峰可能排队。" },
+  { id: "weixiang", name: "卫巷—新安里街区", category: "nearby", icon: "吃", x: 18, y: 25, lat: 32.05985, lng: 118.78213, location: "毗邻校西", hours: "各店不同", status: "unknown", verified: false, tags: ["平价", "汤包", "煎饼", "牛肉面"], description: "以平价餐饮和街头小吃为主。" },
+  { id: "wenchang-food", name: "文昌天桥下餐饮区", category: "nearby", icon: "吃", x: 94, y: 70, lat: 32.05518, lng: 118.79212, location: "文昌桥东侧", hours: "各店不同", status: "unknown", verified: false, tags: ["牛肉面", "羊肉汤", "旋转火锅", "早餐"], description: "面向太平北路的社区餐饮区域。" },
+  { id: "library-print", name: "图书馆大厅自助打印", category: "service", icon: "印", x: 49, y: 43, lat: 32.05807, lng: 118.78672, location: "图书馆1楼大厅", hours: "随图书馆开放", status: "open", verified: false, tags: ["打印", "自助"], description: "具体设备状态、收费和支持纸型待人工核验。" },
+  { id: "shatang-express", name: "沙塘园近邻宝", category: "service", icon: "递", x: 70, y: 78, lat: 32.05494, lng: 118.78814, location: "沙塘园附近", hours: "待核验", status: "unknown", verified: false, tags: ["快递", "收寄"], description: "快递地址建议填写到宿舍区。" },
+  { id: "aed-library", name: "图书馆 AED", category: "medical", icon: "AED", x: 51, y: 37, lat: 32.05824, lng: 118.78681, location: "图书馆内，具体楼层待核验", hours: "随场所开放", status: "open", verified: false, tags: ["AED", "急救"], description: "指南确认图书馆设有AED，精确点位需人工标注。" }
+];
+
+window.MAP_THEMES = [
+  { id: "all", label: "全校导览", icon: "⌖", color: "#173f32" },
+  { id: "study", label: "学习空间", icon: "书", color: "#4f7c58" },
+  { id: "dining", label: "食堂餐饮", icon: "食", color: "#c27a36" },
+  { id: "dorm", label: "宿舍生活", icon: "宿", color: "#758b3d" },
+  { id: "office", label: "行政办事", icon: "办", color: "#375d75" },
+  { id: "sports", label: "运动场馆", icon: "体", color: "#9a6f39" },
+  { id: "service", label: "生活服务", icon: "印", color: "#7c5f76" },
+  { id: "medical", label: "医疗急救", icon: "医", color: "#a6423c" },
+  { id: "transport", label: "交通出行", icon: "地", color: "#287a6b" },
+  { id: "nearby", label: "校园周边", icon: "吃", color: "#8b633d" }
+];
+

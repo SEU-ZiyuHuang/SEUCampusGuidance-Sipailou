@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: seu-campus-map-agent
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    autoDeployTrigger: commit
+    healthCheckPath: /
+    envVars:
+      - key: HOST
+        value: 0.0.0.0
+      - key: NODE_VERSION
+        value: 24.15.0
+      - key: TENCENT_MAP_KEY
+        sync: false
+      - key: DEEPSEEK_API_KEY
+        sync: false

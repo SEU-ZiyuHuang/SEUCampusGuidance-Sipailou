@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#173f32" />
+    <title>东南大学四牌楼校园指南 · Demo</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23173f32'/%3E%3Ctext x='32' y='39' text-anchor='middle' font-size='22' font-family='Arial' font-weight='700' fill='%23e4eadb'%3ESEU%3C/text%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <button class="brand" data-action="home" aria-label="返回地图首页">
+          <span class="brand-mark">SEU</span>
+          <span>
+            <strong>四牌楼校园指南</strong>
+            <small>SIPAILOU CAMPUS GUIDE · 2025.08</small>
+          </span>
+        </button>
+        <div class="search-wrap">
+          <span class="search-icon">⌕</span>
+          <input id="searchInput" type="search" placeholder="搜索地点、服务，或输入“晚上哪里能打印”" autocomplete="off" />
+          <kbd>/</kbd>
+        </div>
+        <div class="top-actions">
+          <span id="dataStatus" class="status-pill warning">演示数据 · 待核准</span>
+          <button id="guideButton" class="ghost-button">原指南</button>
+          <button id="agentButton" class="primary-button">问校园 Agent</button>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <aside class="sidebar">
+          <div class="sidebar-heading">
+            <div>
+              <span class="eyebrow">EXPLORE</span>
+              <h1>今天想去哪里？</h1>
+            </div>
+            <button id="mobileCollapse" class="icon-button" aria-label="收起列表">−</button>
+          </div>
+
+          <div id="themeList" class="theme-list" aria-label="主题分类"></div>
+
+          <div class="filter-row">
+            <button class="filter-chip active" data-filter="all">全部</button>
+            <button class="filter-chip" data-filter="open">营业中</button>
+            <button class="filter-chip" data-filter="verified">已核验</button>
+          </div>
+
+          <div class="result-summary">
+            <span id="resultTitle">校园精选</span>
+            <span id="resultCount">0 项</span>
+          </div>
+          <div id="resultList" class="result-list"></div>
+        </aside>
+
+        <section class="map-stage" aria-label="校园地图">
+          <div id="tencentMap" class="tencent-map" hidden></div>
+          <div id="fallbackMap" class="fallback-map">
+            <svg viewBox="0 0 1200 780" role="img" aria-label="四牌楼校园示意图">
+              <defs>
+                <linearGradient id="mapBg" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#e4eadb" />
+                  <stop offset="1" stop-color="#cbd7bd" />
+                </linearGradient>
+                <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="7" stdDeviation="7" flood-color="#173f32" flood-opacity=".14" />
+                </filter>
+              </defs>
+              <rect width="1200" height="780" fill="url(#mapBg)" />
+              <g class="roads">
+                <path d="M0 130H1200" />
+                <path d="M170 0V780" />
+                <path d="M960 0V780" />
+                <path d="M0 650H1200" />
+                <path d="M420 130V650" />
+                <path d="M755 130V650" />
+              </g>
+              <g class="road-labels">
+                <text x="510" y="118">北京东路</text>
+                <text x="105" y="410" transform="rotate(-90 105 410)">进香河路</text>
+                <text x="1015" y="420" transform="rotate(-90 1015 420)">太平北路</text>
+                <text x="525" y="690">四牌楼 · 成贤街</text>
+              </g>
+              <g id="svgCampusAreas">
+                <path class="area main" d="M210 165H930V625H210Z" />
+                <path class="area west" d="M20 170H155V610H20Z" />
+                <path class="area dorm" d="M790 470H930V625H790Z" />
+                <path class="area dorm" d="M980 270H1170V610H980Z" />
+              </g>
+              <g id="svgBuildings" filter="url(#shadow)">
+                <rect class="building landmark" x="475" y="260" width="150" height="95" rx="12" data-feature="library" />
+                <rect class="building" x="300" y="210" width="110" height="75" rx="9" data-feature="stadium" />
+                <rect class="building" x="650" y="205" width="100" height="72" rx="9" data-feature="auditorium" />
+                <rect class="building" x="470" y="395" width="115" height="70" rx="9" data-feature="zhongshan" />
+                <rect class="building" x="615" y="390" width="110" height="70" rx="9" data-feature="dongnan" />
+                <rect class="building service" x="345" y="505" width="115" height="70" rx="9" data-feature="canteen" />
+                <rect class="building dorm-building" x="800" y="500" width="100" height="38" rx="7" data-feature="shatang1" />
+                <rect class="building dorm-building" x="800" y="550" width="100" height="38" rx="7" data-feature="shatang2" />
+                <rect class="building dorm-building" x="1010" y="315" width="120" height="34" rx="7" data-feature="wenchang7" />
+                <rect class="building dorm-building" x="1010" y="370" width="120" height="34" rx="7" data-feature="wenchang12" />
+                <rect class="building dorm-building" x="35" y="320" width="105" height="45" rx="7" data-feature="westDorm" />
+                <rect class="building service" x="35" y="405" width="105" height="55" rx="7" data-feature="xiangyuan" />
+              </g>
+              <g class="building-labels">
+                <text x="550" y="314">图书馆</text>
+                <text x="355" y="252">体育场</text>
+                <text x="700" y="247">大礼堂</text>
+                <text x="527" y="437">中山院</text>
+                <text x="670" y="432">东南院</text>
+                <text x="403" y="547">沙塘园食堂</text>
+                <text x="850" y="490">沙塘园</text>
+                <text x="1070" y="300">文昌桥宿舍区</text>
+                <text x="87" y="300">校西</text>
+                <text x="87" y="438">香园食堂</text>
+              </g>
+              <g class="gate-labels">
+                <text x="525" y="640">↑ 南门</text>
+                <text x="915" y="390">东门 →</text>
+                <text x="215" y="390">← 西门</text>
+              </g>
+            </svg>
+            <div id="fallbackMarkers" class="fallback-markers"></div>
+            <div class="map-watermark">
+              <strong>无腾讯地图 Key · 校园示意模式</strong>
+              <span>位置为 Demo 推测，等待人工核准</span>
+            </div>
+          </div>
+
+          <div class="map-toolbar">
+            <button id="locateButton" class="map-tool" title="定位">◎</button>
+            <button id="zoomInButton" class="map-tool" title="放大">＋</button>
+            <button id="zoomOutButton" class="map-tool" title="缩小">−</button>
+          </div>
+
+          <div id="layerBar" class="layer-bar"></div>
+
+          <section id="detailPanel" class="detail-panel" aria-live="polite">
+            <button id="detailClose" class="detail-close" aria-label="关闭详情">×</button>
+            <div id="detailContent"></div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <section id="agentDrawer" class="agent-drawer" aria-label="校园 Agent">
+      <div class="agent-header">
+        <div>
+          <span class="agent-orb">✦</span>
+          <strong>校园 Agent</strong>
+          <small id="agentMode">本地演示模式</small>
+        </div>
+        <button id="agentClose" class="icon-button">×</button>
+      </div>
+      <div id="chatMessages" class="chat-messages"></div>
+      <div id="promptSuggestions" class="prompt-suggestions"></div>
+      <form id="chatForm" class="chat-form">
+        <textarea id="chatInput" rows="1" placeholder="例如：晚上九点半哪里还能打印？"></textarea>
+        <button type="submit" aria-label="发送">↑</button>
+      </form>
+      <p class="agent-note">Agent 会调用校园数据，不应自行编造地点；当前坐标和状态仍待人工核准。</p>
+    </section>
+
+    <section id="guideModal" class="modal" aria-label="原始指南">
+      <div class="modal-card guide-modal-card">
+        <div class="modal-header">
+          <div>
+            <span class="eyebrow">SOURCE GUIDE</span>
+            <h2>十张原始校园指南</h2>
+          </div>
+          <button id="guideClose" class="icon-button">×</button>
+        </div>
+        <div id="guideGallery" class="guide-gallery"></div>
+      </div>
+    </section>
+
+    <script src="./runtime-config.js"></script>
+    <script>window.APP_CONFIG = window.APP_CONFIG || { tencentMapKey: "", agentEnabled: false };</script>
+    <script src="./data/guide-data.js"></script>
+    <script src="./data/map-features.js"></script>
+    <script src="./data/guide-pages.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
