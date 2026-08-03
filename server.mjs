@@ -9,6 +9,8 @@ const port = Number(process.env.PORT || 5173);
 const host = process.env.HOST || "127.0.0.1";
 const deepseekKey = process.env.DEEPSEEK_API_KEY || "";
 const mapKey = process.env.TENCENT_MAP_KEY || "";
+const buildVersion = (process.env.RENDER_GIT_COMMIT || "local").slice(0, 7);
+const deepseekTimeoutMs = Number(process.env.DEEPSEEK_TIMEOUT_MS || 35_000);
 
 const mimeTypes = {
   ".html": "text/html; charset=utf-8",
@@ -52,15 +54,37 @@ async function readJson(request) {
   return JSON.parse(body || "{}");
 }
 
+function tokenizeSearchText(value) {
+  const chunks = String(value).toLowerCase().match(/[\p{Script=Han}]+|[a-z0-9]+/gu) || [];
+  const terms = new Set();
+  for (const chunk of chunks) {
+    if (!/^[\p{Script=Han}]+$/u.test(chunk)) {
+      terms.add(chunk);
+      continue;
+    }
+    const characters = Array.from(chunk);
+    if (characters.length <= 4) terms.add(chunk);
+    for (let size = 2; size <= Math.min(4, characters.length); size += 1) {
+      for (let index = 0; index <= characters.length - size; index += 1) {
+        terms.add(characters.slice(index, index + size).join(""));
+      }
+    }
+  }
+  return [...terms];
+}
+
+function relevanceScore(item, terms) {
+  const haystack = JSON.stringify(item).toLowerCase();
+  return terms.reduce((score, term) => score + (haystack.includes(term) ? Math.min(term.length, 4) : 0), 0);
+}
+
 function findRelevantContext(message) {
-  const terms = String(message).toLowerCase().split(/[\s，。？！,.!?、]+/).filter(Boolean);
+  const terms = tokenizeSearchText(message);
   const scoredFeatures = mapFeatures.map((item) => {
-    const haystack = JSON.stringify(item).toLowerCase();
-    return { item, score: terms.reduce((score, term) => score + (haystack.includes(term) ? 1 : 0), 0) };
+    return { item, score: relevanceScore(item, terms) };
   }).sort((a, b) => b.score - a.score).filter((entry) => entry.score > 0).slice(0, 10).map((entry) => entry.item);
   const records = (guideData.records || []).map((item) => {
-    const haystack = JSON.stringify(item).toLowerCase();
-    return { item, score: terms.reduce((score, term) => score + (haystack.includes(term) ? 1 : 0), 0) };
+    return { item, score: relevanceScore(item, terms) };
   }).sort((a, b) => b.score - a.score).filter((entry) => entry.score > 0).slice(0, 15).map((entry) => entry.item);
   return { mapFeatures: scoredFeatures, guideRecords: records };
 }
@@ -73,6 +97,7 @@ async function handleAgent(request, response) {
   const context = findRelevantContext(message);
   const completion = await fetch("https://api.deepseek.com/chat/completions", {
     method: "POST",
+    signal: AbortSignal.timeout(deepseekTimeoutMs),
     headers: { "Content-Type": "application/json", "Authorization": `Bearer ${deepseekKey}` },
     body: JSON.stringify({
       model: "deepseek-v4-flash",
@@ -113,7 +138,7 @@ async function serveStatic(request, response) {
   const requestUrl = new URL(request.url, `http://${request.headers.host || "localhost"}`);
   if (requestUrl.pathname === "/runtime-config.js") {
     response.writeHead(200, { "Content-Type": "text/javascript; charset=utf-8", "Cache-Control": "no-store" });
-    response.end(`window.APP_CONFIG=${JSON.stringify({ tencentMapKey: mapKey, agentEnabled: Boolean(deepseekKey), model: "deepseek-v4-flash" })};`);
+    response.end(`window.APP_CONFIG=${JSON.stringify({ tencentMapKey: mapKey, agentEnabled: Boolean(deepseekKey), model: "deepseek-v4-flash", version: buildVersion })};`);
     return;
   }
   let pathname = decodeURIComponent(requestUrl.pathname);

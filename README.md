@@ -1,5 +1,9 @@
 # 东南大学四牌楼校园地图 + Agent Demo
 
+在线测试地址：https://seu-campus-map-agent.onrender.com/
+
+项目连接 GitHub `main` 分支与 Render 免费 Web Service。每次推送到 `main` 后，Render 会自动构建并发布；免费实例空闲后可能休眠，首次打开需要等待唤醒。
+
 这是一期的纯 HTML/CSS/JavaScript 原型，用于先验证十张校园指南的呈现方式、地图交互和 Agent 联动。当前坐标、入口和营业状态均属于 Demo 数据，必须经过人工核验后才能作为正式信息发布。
 
 ## 直接预览
@@ -74,4 +78,3 @@ DeepSeek Key 只保存在服务端环境变量中，不会发送到浏览器。D
 - 已保留 DeepSeek 服务端代理；
 - 尚未实现正式 PostGIS 数据库、用户账号、运营后台和实时营业状态；
 - 正式工程将在交互方向确认后迁移到组件化前端和结构化后端。
-
