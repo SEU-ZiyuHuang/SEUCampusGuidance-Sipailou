@@ -1,0 +1,17 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/runtime-config.js",
+      "destination": "/api/runtime-config"
+    }
+  ],
+  "functions": {
+    "api/agent/chat.js": {
+      "maxDuration": 60
+    },
+    "api/runtime-config.js": {
+      "maxDuration": 10
+    }
+  }
+}

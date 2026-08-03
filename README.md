@@ -4,6 +4,8 @@
 
 项目连接 GitHub `main` 分支与 Render 免费 Web Service。每次推送到 `main` 后，Render 会自动构建并发布；免费实例空闲后可能休眠，首次打开需要等待唤醒。
 
+项目同时支持 Vercel：静态页面由Vercel托管，`/api/agent/chat` 和 `/api/runtime-config` 使用Node.js Functions。Vercel项目中需要配置 `TENCENT_MAP_KEY` 和 `DEEPSEEK_API_KEY` 两个环境变量。
+
 这是一期的纯 HTML/CSS/JavaScript 原型，用于先验证十张校园指南的呈现方式、地图交互和 Agent 联动。当前坐标、入口和营业状态均属于 Demo 数据，必须经过人工核验后才能作为正式信息发布。
 
 ## 直接预览

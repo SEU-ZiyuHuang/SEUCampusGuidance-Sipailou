@@ -3,6 +3,7 @@
 !.env.example
 node_modules/
 config.local.js
+.vercel/
 .DS_Store
 outputs/
 *.xlsx
