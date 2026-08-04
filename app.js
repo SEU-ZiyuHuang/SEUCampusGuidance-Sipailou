@@ -38,6 +38,7 @@
 
   const themeById = Object.fromEntries(window.MAP_THEMES.map((theme) => [theme.id, theme]));
   const featureById = Object.fromEntries(window.MAP_FEATURES.map((feature) => [feature.id, feature]));
+  const toTencentCoordinate = (latitude, longitude) => window.CampusCoordinates.wgs84ToGcj02(latitude, longitude);
   const sheetCategory = {
     "宿舍信息": "dorm", "食堂信息": "dining", "图书馆与学习设施": "study",
     "行政窗口": "office", "交通信息": "transport", "周边餐饮": "nearby",
@@ -165,7 +166,8 @@
     renderResults();
     renderDetail(feature);
     if (state.tmap && !feature.knowledgeOnly) {
-      state.tmap.easeTo({ center: new TMap.LatLng(feature.lat, feature.lng), zoom: 18 });
+      const coordinate = toTencentCoordinate(feature.lat, feature.lng);
+      state.tmap.easeTo({ center: new TMap.LatLng(coordinate.latitude, coordinate.longitude), zoom: 18 });
     }
   }
 
@@ -287,12 +289,15 @@
 
   function updateTencentMarkers(visibleIds) {
     if (!state.tmapMarkers || !window.TMap) return;
-    const geometries = window.MAP_FEATURES.filter((feature) => visibleIds.has(feature.id)).map((feature) => ({
-      id: feature.id,
-      styleId: feature.category === "medical" ? "alert" : "default",
-      position: new TMap.LatLng(feature.lat, feature.lng),
-      properties: { title: feature.name },
-    }));
+    const geometries = window.MAP_FEATURES.filter((feature) => visibleIds.has(feature.id)).map((feature) => {
+      const coordinate = toTencentCoordinate(feature.lat, feature.lng);
+      return {
+        id: feature.id,
+        styleId: feature.category === "medical" ? "alert" : "default",
+        position: new TMap.LatLng(coordinate.latitude, coordinate.longitude),
+        properties: { title: feature.name },
+      };
+    });
     state.tmapMarkers.setGeometries(geometries);
   }
 
@@ -301,8 +306,9 @@
     elements.fallbackMap.hidden = true;
     elements.tencentMap.hidden = false;
     state.mapMode = "tencent";
+    const campusCenter = toTencentCoordinate(32.0577, 118.7868);
     state.tmap = new TMap.Map(elements.tencentMap, {
-      center: new TMap.LatLng(32.0577, 118.7868),
+      center: new TMap.LatLng(campusCenter.latitude, campusCenter.longitude),
       zoom: 17,
       pitch: 0,
       rotation: 0,
@@ -402,7 +408,8 @@
     document.querySelector("#locateButton").addEventListener("click", () => {
       if (!navigator.geolocation) return openAgent("如何根据我的当前位置找附近服务？");
       navigator.geolocation.getCurrentPosition((position) => {
-        if (state.tmap) state.tmap.easeTo({ center: new TMap.LatLng(position.coords.latitude, position.coords.longitude), zoom: 18 });
+        const coordinate = toTencentCoordinate(position.coords.latitude, position.coords.longitude);
+        if (state.tmap) state.tmap.easeTo({ center: new TMap.LatLng(coordinate.latitude, coordinate.longitude), zoom: 18 });
         else openAgent("已获得我的当前位置，请推荐附近的校园服务");
       }, () => openAgent("定位权限未开启，如何从南门开始校园导览？"));
     });
