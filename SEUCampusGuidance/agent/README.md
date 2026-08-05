@@ -133,6 +133,8 @@ curl -N -X POST https://<你的域名>/api/chat -H 'Content-Type: application/js
 第三条要确认事件**逐条到达**而不是最后一次性刷屏。若是后者，检查响应头的 `X-Accel-Buffering: no` 是否还在。
 
 > **`.vercelignore` 里的 `server.mjs` 那行不能删。** Vercel 的 Node 运行时会自动探测项目根的 `server.mjs`，只要它调用了 `listen()` 就会被捕获成接管全部路由的 Function，与 `api/` 下的 Function 冲突。
+>
+> **`vercel.json` 里的 `"framework": null` 也不能删。** 较新版本的 Vercel CLI（实测 58.1.0）会因为 `package.json` 里有 `"start": "node server.mjs"` 而把项目误判成「Node.js 长驻服务」框架，转而去找入口文件——但 `server.mjs` 已经被 `.vercelignore` 排除，于是报 `No entrypoint found`。显式关闭框架探测后按零配置的静态站点 + Function 处理，才是这个项目要的行为。
 
 ## 成本护栏
 
