@@ -13,6 +13,8 @@ SEUCampusGuidance/
 
 Web 通过 `POST /api/agent/chat` 转发到 Agent 服务（默认 `http://127.0.0.1:5174`），两者共享 `data/` 下的校园数据。
 
+校区指南 Agent 的产品需求文档与整体路线图见 [docs/PRD-校区指南Agent.md](docs/PRD-校区指南Agent.md)。
+
 ## 本地启动
 
 需要 Node.js 20 或更高版本。
@@ -87,6 +89,7 @@ DeepSeek Key 只保存在 Agent 服务端环境变量中，不会发送到浏览
 
 ## 数据文件
 
+- `原校区指南-md文档整理/`：六校区 2025 版指南的结构化 md 文档（Agent 知识源，约 16.3 万字）；
 - `data/guide-data.js`：从现有 Excel 自动导出的完整记录；
 - `data/map-features.js`：第一版推测地图坐标和核心交互点；
 - `data/guide-pages.js`：十张指南与网页组件的对应关系；
