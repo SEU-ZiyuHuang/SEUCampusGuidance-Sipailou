@@ -1,0 +1,101 @@
+{
+  "generatedAt": "2026-08-05T14:42:28.141Z",
+  "campuses": [
+    {
+      "slug": "dingjiaqiao",
+      "file": "东南大学丁家桥校区指南_25版整理.md",
+      "sourceChars": 11090,
+      "chunks": 13,
+      "chunkChars": 7448,
+      "declaredKeys": 14
+    },
+    {
+      "slug": "jiulonghu",
+      "file": "东南大学九龙湖校区指南_2025版整理.md",
+      "sourceChars": 19449,
+      "chunks": 20,
+      "chunkChars": 15718,
+      "declaredKeys": 14
+    },
+    {
+      "slug": "sipailou",
+      "file": "东南大学四牌楼校区指南_2025版整理.md",
+      "sourceChars": 13183,
+      "chunks": 14,
+      "chunkChars": 10484,
+      "declaredKeys": 12
+    },
+    {
+      "slug": "wuxi",
+      "file": "东南大学无锡校区指南_2025版整理.md",
+      "sourceChars": 12853,
+      "chunks": 13,
+      "chunkChars": 9635,
+      "declaredKeys": 18
+    },
+    {
+      "slug": "jiangbei",
+      "file": "东南大学江北校区指南_2025版整理.md",
+      "sourceChars": 8026,
+      "chunks": 6,
+      "chunkChars": 5252,
+      "declaredKeys": 10
+    },
+    {
+      "slug": "suzhou",
+      "file": "东南大学苏州校区指南_2025版整理.md",
+      "sourceChars": 10500,
+      "chunks": 10,
+      "chunkChars": 7569,
+      "declaredKeys": 12
+    }
+  ],
+  "unmatchedKeys": [
+    {
+      "campus": "dingjiaqiao",
+      "key": "laundry_and_hot_water",
+      "reason": "无足够相似章节"
+    },
+    {
+      "campus": "jiulonghu",
+      "key": "canteens_and_medical",
+      "reason": "无足够相似章节"
+    },
+    {
+      "campus": "jiulonghu",
+      "key": "sports_and_pool",
+      "reason": "无足够相似章节"
+    },
+    {
+      "campus": "wuxi",
+      "key": "delivery_and_takeout",
+      "reason": "无足够相似章节"
+    },
+    {
+      "campus": "jiangbei",
+      "key": "nearby_food_districts",
+      "reason": "无足够相似章节"
+    },
+    {
+      "campus": "jiangbei",
+      "key": "stations_airport_and_campuses",
+      "reason": "无足够相似章节"
+    },
+    {
+      "campus": "suzhou",
+      "key": "repair_and_contacts",
+      "reason": "无足够相似章节"
+    }
+  ],
+  "chunksWithoutPages": [
+    "jiulonghu/10/5"
+  ],
+  "oversizedChunks": [],
+  "build": {
+    "generatedAt": "2026-08-05T14:42:28.141Z",
+    "campusCount": 6,
+    "chunkCount": 76,
+    "chunkChars": 56106
+  },
+  "mapFeatures": 23
+}

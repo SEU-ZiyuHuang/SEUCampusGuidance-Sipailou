@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#173f32" />
+<meta name="description" content="东南大学六校区新生生活指南问答，基于地理协会 2025 版《新生实用信息简明指南》。" />
+<title>东南大学校区指南 Agent</title>
+<link rel="stylesheet" href="./chat.css" />
+</head>
+<body>
+<div class="chat-shell">
+
+  <header class="chat-topbar">
+    <div class="brand">
+      <span class="brand-mark">SEU</span>
+      <span class="brand-text">
+        <strong>校区指南 Agent</strong>
+        <small>六校区 · 地理协会 2025 版指南</small>
+      </span>
+    </div>
+    <button type="button" id="aboutButton" class="icon-button" aria-label="关于本站">?</button>
+  </header>
+
+  <nav class="campus-bar" id="campusBar" aria-label="选择校区">
+    <button type="button" class="campus-chip active" data-campus="auto">自动判断</button>
+    <button type="button" class="campus-chip" data-campus="jiulonghu">九龙湖</button>
+    <button type="button" class="campus-chip" data-campus="sipailou">四牌楼</button>
+    <button type="button" class="campus-chip" data-campus="dingjiaqiao">丁家桥</button>
+    <button type="button" class="campus-chip" data-campus="suzhou">苏州</button>
+    <button type="button" class="campus-chip" data-campus="jiangbei">江北</button>
+    <button type="button" class="campus-chip" data-campus="wuxi">无锡</button>
+    <!-- 定位判断校区是 M1 功能，按钮先占位。见 chat.js 的 locate 分支。 -->
+    <button type="button" class="icon-button locate-button" id="locateButton" title="用定位判断校区" hidden>◎</button>
+  </nav>
+
+  <main id="messageList" class="message-list" aria-live="polite" aria-busy="false">
+    <section class="intro">
+      <h1>想知道校园里的什么？</h1>
+      <p>覆盖九龙湖、四牌楼、丁家桥、苏州、江北、无锡六个校区的宿舍、食堂、图书馆、快递、体育场馆、接驳车与周边生活信息。</p>
+    </section>
+  </main>
+
+  <template id="turnTemplate">
+    <article class="turn">
+      <div class="turn-trace" hidden>
+        <button type="button" class="trace-toggle" aria-expanded="false">
+          <span class="spinner"></span><span class="trace-title">正在检索…</span>
+        </button>
+        <ol class="trace-steps" hidden></ol>
+      </div>
+      <div class="message assistant turn-body"></div>
+      <details class="turn-sources" hidden>
+        <summary>来源 · <span class="sources-count"></span></summary>
+        <ul class="sources-list"></ul>
+      </details>
+    </article>
+  </template>
+
+  <div id="suggestions" class="prompt-suggestions"></div>
+
+  <form id="chatForm" class="chat-form">
+    <textarea id="chatInput" rows="1" maxlength="500" autocomplete="off"
+      placeholder="例如：梅园的床帘要买多大？"></textarea>
+    <button type="submit" id="sendButton" aria-label="发送">↑</button>
+  </form>
+
+  <p class="agent-note">
+    学生社团作品，<strong>非东南大学官方服务</strong>。答案依据 2025 版《东南大学新生实用信息简明指南》
+    （CC BY-SA 4.0 · 东南大学地理协会 @东奔南走）。营业时间、班次、电话等易变信息请以现场公告或官方渠道为准；
+    紧急情况请直接拨打 120／119／110。
+  </p>
+
+</div>
+
+<div id="aboutModal" class="modal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
+    <div class="modal-header">
+      <h2 id="aboutTitle">关于本站</h2>
+      <button type="button" id="aboutClose" class="icon-button" aria-label="关闭">×</button>
+    </div>
+    <div class="modal-body" id="aboutBody"></div>
+  </div>
+</div>
+
+<script src="./chat.js"></script>
+</body>
+</html>
