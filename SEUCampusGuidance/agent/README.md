@@ -54,13 +54,17 @@ npm run build:knowledge     # 重新生成 data/knowledge.mjs 与 knowledge.repo
 
 ## 自检
 
-没有测试框架，靠这三个命令：
+没有测试框架，靠这四个命令。**前三个不需要 API key，不花钱**：
 
 ```bash
 npm run check                 # 全部文件 node --check 语法检查
 npm run suite                 # 检索回归基线，16 条 query 断言 top1 章节，应 16/16
-DEEPSEEK_API_KEY=xxx npm run loop -- --suite     # 四条必测行为，人工判读
+npm run test:loop             # 用假 DeepSeek 响应验证多轮循环的控制流，6 个场景
+DEEPSEEK_API_KEY=xxx npm run loop -- --suite     # 打真实 API，四条必测行为，人工判读
 ```
+
+改动 `lib/agent-loop.mjs` 或 `lib/tools.mjs` 后应当先跑 `npm run test:loop`——它覆盖换词重检、
+预检索快路径、轮数上限、重复调用检测、跨校区切换和流式降级六种情形，出问题能立刻定位。
 
 `scripts/query.mjs` 还支持单条调试与查看目录：
 
@@ -132,7 +136,20 @@ curl -N -X POST https://<你的域名>/api/chat -H 'Content-Type: application/js
 
 ## 成本护栏
 
-单次提问典型开销为 2 次 API 调用、输入约 4—6k token。已内置：输入 ≤500 字、history ≤6 条、工具返回正文总预算 9000 字符、决策轮 `max_tokens` 500、已检索过的章节不重复回正文、最多 4 轮工具调用、按 IP 每分钟 10 次频控。
+单次提问的 API 调用数（实测自 `npm run test:loop`）：
+
+| 情形 | 调用数 |
+| --- | ---: |
+| 预检索就够，模型直接作答 | 1 |
+| 1 次工具调用，且模型在收手那轮写完了答案 | 2 |
+| 1 次工具调用 + 独立生成轮 | 3 |
+| N 次工具调用（N ≤ 4） | N + 2 |
+
+注意工具调用之后模型还需要一轮决策才知道「资料够了」，所以不是「调 N 次工具 = N+1 次请求」。
+决策轮 `max_tokens` 给到 500 就是为了让模型可能在收手那轮直接写完答案，省掉生成轮。
+
+输入约 4—6k token。已内置的护栏：输入 ≤500 字、history ≤6 条、工具返回正文总预算 9000 字符、
+已检索过的章节不重复回正文、最多 4 轮工具调用、按 IP 每分钟 10 次频控。
 
 注意频控是**单实例内存**实现，serverless 下每个实例独立计数，只能挡住无脑循环，不是严格的全局配额。真要控成本得上 KV，会引入依赖，留到 M1 决策。
 
