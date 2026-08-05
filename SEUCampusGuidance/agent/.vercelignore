@@ -1,0 +1,11 @@
+# server.mjs 必须排除：Vercel 的 Node 运行时会自动探测项目根的 server.mjs，
+# 只要它调用了 listen() 就会被捕获成接管全部路由的 Function，与 api/ 下的 Function 冲突。
+server.mjs
+
+scripts/
+.env
+.env.*
+!.env.example
+.vercel/
+node_modules/
+.DS_Store

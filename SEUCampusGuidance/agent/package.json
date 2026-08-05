@@ -1,14 +1,19 @@
 {
   "name": "seu-campus-guide-agent",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
-  "description": "东南大学四牌楼校园指南 Agent 服务（DeepSeek）",
+  "description": "东南大学六校区指南 Agent（DeepSeek + 多轮工具调用 + SSE 流式）",
   "scripts": {
     "start": "node server.mjs",
-    "check": "node --check server.mjs && node --check chat.js"
+    "build:knowledge": "node scripts/build-knowledge.mjs",
+    "query": "node scripts/query.mjs",
+    "suite": "node scripts/query.mjs --suite",
+    "test:loop": "node scripts/loop-mock.mjs",
+    "loop": "node scripts/loop-demo.mjs",
+    "check": "node --check server.mjs && node --check api/chat.js && node --check api/health.js && node --check api/agent/chat.js && node --check data/knowledge.mjs && node --check data/map-features.mjs && node --check lib/agent-loop.mjs && node --check lib/campus.mjs && node --check lib/deepseek.mjs && node --check lib/legacy.mjs && node --check lib/prompt.mjs && node --check lib/ratelimit.mjs && node --check lib/retrieve.mjs && node --check lib/sse.mjs && node --check lib/tools.mjs && node --check lib/validate.mjs && node --check scripts/build-knowledge.mjs && node --check scripts/loop-demo.mjs && node --check scripts/loop-mock.mjs && node --check scripts/query.mjs && node --check public/chat.js"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=20.19.0"
   }
 }
