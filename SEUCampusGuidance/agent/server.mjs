@@ -5,28 +5,15 @@ import vm from "node:vm";
 import { fileURLToPath } from "node:url";
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
-const port = Number(process.env.PORT || 5173);
+const dataDir = path.resolve(rootDir, "..", "data");
+const port = Number(process.env.PORT || 5174);
 const host = process.env.HOST || "127.0.0.1";
 const deepseekKey = process.env.DEEPSEEK_API_KEY || "";
-const mapKey = process.env.TENCENT_MAP_KEY || "";
-const buildVersion = (process.env.RENDER_GIT_COMMIT || "local").slice(0, 7);
 const deepseekTimeoutMs = Number(process.env.DEEPSEEK_TIMEOUT_MS || 35_000);
-
-const mimeTypes = {
-  ".html": "text/html; charset=utf-8",
-  ".css": "text/css; charset=utf-8",
-  ".js": "text/javascript; charset=utf-8",
-  ".json": "application/json; charset=utf-8",
-  ".jpg": "image/jpeg",
-  ".jpeg": "image/jpeg",
-  ".png": "image/png",
-  ".svg": "image/svg+xml",
-  ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-};
 
 async function loadBrowserData(file, variableName) {
   try {
-    const source = await fs.readFile(path.join(rootDir, file), "utf8");
+    const source = await fs.readFile(path.join(dataDir, file), "utf8");
     const sandbox = { window: {} };
     vm.runInNewContext(source, sandbox, { timeout: 1000 });
     return sandbox.window[variableName] || [];
@@ -36,8 +23,8 @@ async function loadBrowserData(file, variableName) {
 }
 
 const [mapFeatures, guideData] = await Promise.all([
-  loadBrowserData("data/map-features.js", "MAP_FEATURES"),
-  loadBrowserData("data/guide-data.js", "GUIDE_DATA"),
+  loadBrowserData("map-features.js", "MAP_FEATURES"),
+  loadBrowserData("guide-data.js", "GUIDE_DATA"),
 ]);
 
 function sendJson(response, status, payload) {
@@ -134,33 +121,11 @@ async function handleAgent(request, response) {
   }
 }
 
-async function serveStatic(request, response) {
-  const requestUrl = new URL(request.url, `http://${request.headers.host || "localhost"}`);
-  if (requestUrl.pathname === "/runtime-config.js") {
-    response.writeHead(200, { "Content-Type": "text/javascript; charset=utf-8", "Cache-Control": "no-store" });
-    response.end(`window.APP_CONFIG=${JSON.stringify({ tencentMapKey: mapKey, agentEnabled: Boolean(deepseekKey), model: "deepseek-v4-flash", version: buildVersion })};`);
-    return;
-  }
-  let pathname = decodeURIComponent(requestUrl.pathname);
-  if (pathname === "/") pathname = "/index.html";
-  const absolutePath = path.resolve(rootDir, `.${pathname}`);
-  if (!absolutePath.startsWith(rootDir + path.sep)) return sendJson(response, 403, { error: "Forbidden" });
-  try {
-    const stat = await fs.stat(absolutePath);
-    const filePath = stat.isDirectory() ? path.join(absolutePath, "index.html") : absolutePath;
-    const file = await fs.readFile(filePath);
-    response.writeHead(200, { "Content-Type": mimeTypes[path.extname(filePath).toLowerCase()] || "application/octet-stream" });
-    response.end(file);
-  } catch {
-    sendJson(response, 404, { error: "Not found" });
-  }
-}
-
 const server = http.createServer(async (request, response) => {
   try {
     if (request.method === "POST" && request.url === "/api/agent/chat") return await handleAgent(request, response);
-    if (request.method === "GET" || request.method === "HEAD") return await serveStatic(request, response);
-    sendJson(response, 405, { error: "Method not allowed" });
+    if (request.method === "GET" && request.url === "/health") return sendJson(response, 200, { status: "ok", agentEnabled: Boolean(deepseekKey) });
+    sendJson(response, 404, { error: "Not found" });
   } catch (error) {
     console.error(error);
     sendJson(response, 500, { error: "Internal server error" });
@@ -168,7 +133,6 @@ const server = http.createServer(async (request, response) => {
 });
 
 server.listen(port, host, () => {
-  console.log(`SEU campus guide demo: http://${host}:${port}`);
-  console.log(`Tencent map: ${mapKey ? "configured" : "fallback schematic"}`);
-  console.log(`Agent: ${deepseekKey ? "DeepSeek V4 Flash" : "local browser mock"}`);
+  console.log(`SEU campus guide agent: http://${host}:${port}`);
+  console.log(`Agent: ${deepseekKey ? "DeepSeek V4 Flash" : "DEEPSEEK_API_KEY not configured"}`);
 });

@@ -1,6 +1,6 @@
 globalThis.window ||= {};
-await import("../../data/map-features.js");
-await import("../../data/guide-data.js");
+await import("../data/map-features.js");
+await import("../data/guide-data.js");
 
 const mapFeatures = globalThis.window.MAP_FEATURES || [];
 const guideData = globalThis.window.GUIDE_DATA || { records: [] };

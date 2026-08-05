@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { FileBlob, SpreadsheetFile, Workbook } from "@oai/artifact-tool";
 
-const rootDir = path.resolve(import.meta.dirname, "..");
+const rootDir = path.resolve(import.meta.dirname, "..", "..");
 const inputPath = path.join(rootDir, "东南大学四牌楼新生指南.xlsx");
 const outputDir = path.join(rootDir, "outputs", "campus-map-demo");
 const workbookInput = await SpreadsheetFile.importXlsx(await FileBlob.load(inputPath));

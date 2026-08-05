@@ -7,9 +7,6 @@
     }
   ],
   "functions": {
-    "api/agent/chat.js": {
-      "maxDuration": 60
-    },
     "api/runtime-config.js": {
       "maxDuration": 10
     }

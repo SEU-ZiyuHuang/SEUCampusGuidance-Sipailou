@@ -1,0 +1,14 @@
+{
+  "name": "seu-campus-guide-agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "东南大学四牌楼校园指南 Agent 服务（DeepSeek）",
+  "scripts": {
+    "start": "node server.mjs",
+    "check": "node --check server.mjs && node --check chat.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
