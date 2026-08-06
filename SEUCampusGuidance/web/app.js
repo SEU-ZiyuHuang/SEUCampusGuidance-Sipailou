@@ -115,6 +115,11 @@
     return selected ? `${baseId}-selected` : baseId;
   }
 
+  function annotationMarkerStyleId(category, selected = false) {
+    const baseId = markerStyleId(category, false);
+    return selected ? `${baseId}-annotation-selected` : `${baseId}-annotation`;
+  }
+
   function loadAnnotations() {
     try {
       const raw = window.localStorage.getItem(annotationStorageKey);
@@ -218,6 +223,7 @@
     elements.annotationDescription.value = existing?.description || "";
     elements.annotationCoordinate.textContent = formatAnnotationCoordinate(state.pendingAnnotationCoordinate || {});
     elements.annotationEditor.hidden = false;
+    renderMarkers();
     window.setTimeout(() => elements.annotationName.focus(), 0);
   }
 
@@ -225,6 +231,7 @@
     state.editingAnnotationId = null;
     state.pendingAnnotationCoordinate = null;
     if (elements.annotationEditor) elements.annotationEditor.hidden = true;
+    renderMarkers();
   }
 
   function saveAnnotation(event) {
@@ -424,6 +431,10 @@
       </button>
     `).join("");
     elements.markers.innerHTML = featureMarkers + annotationMarkers;
+    state.annotations.forEach((annotation) => {
+      const marker = elements.markers.querySelector(`[data-annotation-id="${CSS.escape(String(annotation.id))}"]`);
+      marker?.style.setProperty("--category-color", categoryColor(annotation.category));
+    });
     updateTencentMarkers(visibleIds);
   }
 
@@ -589,7 +600,7 @@
         .filter((annotation) => Number.isFinite(Number(annotation.lat)) && Number.isFinite(Number(annotation.lng)))
         .map((annotation) => ({
           id: annotation.id,
-          styleId: "annotation",
+          styleId: annotationMarkerStyleId(annotation.category, state.editingAnnotationId === annotation.id),
           position: new TMap.LatLng(Number(annotation.lat), Number(annotation.lng)),
           properties: { title: annotation.name },
         }));
@@ -626,12 +637,16 @@
     });
     const markerSvg = (color) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 46"><path fill="${color}" stroke="white" stroke-width="3" d="M18 1.5c-9 0-16.5 7.2-16.5 16.2C1.5 30 18 44.5 18 44.5S34.5 30 34.5 17.7C34.5 8.7 27 1.5 18 1.5Z"/><circle cx="18" cy="17.5" r="6" fill="white"/></svg>`)}`;
     const selectedMarkerSvg = (color) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 64"><circle cx="26" cy="27" r="24" fill="${color}" opacity=".18"/><circle cx="26" cy="27" r="19" fill="white" opacity=".88"/><path fill="${color}" stroke="white" stroke-width="3.5" d="M26 2.5C13.7 2.5 3.5 12.1 3.5 24.2 3.5 38.2 26 61 26 61s22.5-22.8 22.5-36.8C48.5 12.1 38.3 2.5 26 2.5Z"/><circle cx="26" cy="24" r="7.5" fill="white"/></svg>`)}`;
-    const annotationMarkerSvg = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 60"><path fill="#e26d2e" stroke="white" stroke-width="4" d="M24 2C12.8 2 4 10.4 4 21.4 4 34 24 58 24 58s20-24 20-36.6C44 10.4 35.2 2 24 2Z"/><circle cx="24" cy="21" r="10" fill="white"/><path d="M24 15v12M18 21h12" stroke="#e26d2e" stroke-width="3" stroke-linecap="round"/></svg>`)}`;
+    const annotationMarkerSvg = (color) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 60"><path fill="${color}" stroke="white" stroke-width="4" d="M24 2C12.8 2 4 10.4 4 21.4 4 34 24 58 24 58s20-24 20-36.6C44 10.4 35.2 2 24 2Z"/><circle cx="24" cy="21" r="10" fill="white"/><path d="M24 15v12M18 21h12" stroke="${color}" stroke-width="3" stroke-linecap="round"/></svg>`)}`;
+    const selectedAnnotationMarkerSvg = (color) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 68"><circle cx="28" cy="27" r="26" fill="${color}" opacity=".2"/><path fill="${color}" stroke="white" stroke-width="4.5" d="M28 2C14.8 2 4.5 11.8 4.5 24.5 4.5 39 28 65 28 65s23.5-26 23.5-40.5C51.5 11.8 41.2 2 28 2Z"/><circle cx="28" cy="25" r="11" fill="white"/><path d="M28 18v14M21 25h14" stroke="${color}" stroke-width="3.5" stroke-linecap="round"/></svg>`)}`;
     const markerStyles = {};
+    const annotationStyles = {};
     window.MAP_THEMES.forEach((theme) => {
       const baseId = theme.id === "all" ? "default" : theme.id;
       markerStyles[baseId] = new TMap.MarkerStyle({ width: 36, height: 46, anchor: { x: 18, y: 46 }, src: markerSvg(theme.color) });
       markerStyles[`${baseId}-selected`] = new TMap.MarkerStyle({ width: 52, height: 64, anchor: { x: 26, y: 64 }, src: selectedMarkerSvg(theme.color) });
+      annotationStyles[`${baseId}-annotation`] = new TMap.MarkerStyle({ width: 48, height: 60, anchor: { x: 24, y: 60 }, src: annotationMarkerSvg(theme.color) });
+      annotationStyles[`${baseId}-annotation-selected`] = new TMap.MarkerStyle({ width: 56, height: 68, anchor: { x: 28, y: 68 }, src: selectedAnnotationMarkerSvg(theme.color) });
     });
     state.tmapMarkers = new TMap.MultiMarker({
       map: state.tmap,
@@ -640,9 +655,7 @@
     });
     state.annotationMarkers = new TMap.MultiMarker({
       map: state.tmap,
-      styles: {
-        annotation: new TMap.MarkerStyle({ width: 48, height: 60, anchor: { x: 24, y: 60 }, src: annotationMarkerSvg }),
-      },
+      styles: annotationStyles,
       geometries: [],
     });
     state.tmapMarkers.on("click", (event) => {
