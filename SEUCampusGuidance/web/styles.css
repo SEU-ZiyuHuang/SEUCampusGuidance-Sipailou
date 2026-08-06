@@ -117,20 +117,20 @@ h1, h2, h3, p { margin-top: 0; }
 .map-marker { position: absolute; pointer-events: auto; transform: translate(-50%,-100%); display: grid; place-items: center; width: 34px; height: 34px; color: white; background: var(--category-color); border: 3px solid rgba(255,255,255,.94); border-radius: 50% 50% 50% 7px; box-shadow: 0 7px 16px rgba(16,45,36,.24); rotate: -45deg; cursor: pointer; transition: .18s ease; }
 .map-marker span { rotate: 45deg; font-size: 9px; font-weight: 900; }
 .map-marker:hover, .map-marker.active { width: 42px; height: 42px; z-index: 5; }
-.map-marker.annotation-marker { width: 37px; height: 37px; background: #c2652e; border-radius: 50% 50% 50% 7px; border-style: dashed; }
+.map-marker.annotation-marker { width: 42px; height: 52px; background: #e26d2e; border: 4px solid rgba(255,255,255,.98); border-radius: 50% 50% 50% 8px; box-shadow: 0 0 0 5px rgba(226,109,46,.2), 0 9px 20px rgba(98,47,21,.3); }
 .map-marker.annotation-marker span { font-size: 14px; }
-.map-marker.annotation-marker:hover, .map-marker.annotation-marker.active { width: 44px; height: 44px; }
+.map-marker.annotation-marker:hover, .map-marker.annotation-marker.active { width: 48px; height: 58px; }
 .map-watermark { position: absolute; right: 22px; bottom: 22px; display: flex; flex-direction: column; align-items: flex-end; gap: 3px; padding: 10px 13px; color: var(--forest-900); background: rgba(255,253,246,.84); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,.7); border-radius: 12px; box-shadow: 0 8px 18px rgba(16,45,36,.08); }
 .map-watermark strong { font-size: 10px; }
 .map-watermark span { color: var(--muted); font-size: 9px; }
-.map-toolbar { position: absolute; right: 20px; top: 22px; z-index: 8; display: grid; overflow: hidden; background: white; border: 1px solid var(--line); border-radius: 13px; box-shadow: 0 8px 22px rgba(16,45,36,.12); }
+.map-toolbar { position: absolute; right: 20px; top: 22px; z-index: 1100; display: grid; overflow: hidden; background: white; border: 1px solid var(--line); border-radius: 13px; box-shadow: 0 8px 22px rgba(16,45,36,.12); }
 .map-tool { width: 39px; height: 38px; color: var(--forest-900); background: white; border: 0; border-bottom: 1px solid var(--line); cursor: pointer; }
 .map-tool:last-child { border-bottom: 0; }
-.layer-bar { position: absolute; z-index: 7; left: 20px; top: 20px; display: flex; gap: 7px; flex-wrap: wrap; max-width: calc(100% - 95px); }
+.layer-bar { position: absolute; z-index: 1100; left: 20px; top: 20px; display: flex; gap: 7px; flex-wrap: wrap; max-width: calc(100% - 95px); }
 .layer-button { padding: 8px 12px; color: var(--forest-900); background: rgba(255,253,246,.87); backdrop-filter: blur(9px); border: 1px solid rgba(255,255,255,.75); border-radius: 11px; box-shadow: 0 6px 15px rgba(16,45,36,.07); font-size: 10px; cursor: pointer; }
 .layer-button.active { color: white; background: var(--forest-800); }
 
-.annotation-panel { position: absolute; z-index: 14; top: 72px; left: 20px; width: min(320px, calc(100% - 40px)); max-height: calc(100% - 94px); overflow: auto; padding: 17px; background: rgba(255,253,246,.96); backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,.85); border-radius: 18px; box-shadow: var(--shadow); }
+.annotation-panel { position: absolute; z-index: 1200; top: 72px; left: 20px; width: min(320px, calc(100% - 40px)); max-height: calc(100% - 94px); overflow: auto; padding: 17px; background: rgba(255,253,246,.96); backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,.85); border-radius: 18px; box-shadow: var(--shadow); }
 .annotation-panel-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 .annotation-panel-header strong { display: block; margin-top: 4px; font-family: Georgia, "Songti SC", serif; font-size: 18px; }
 .annotation-count { padding: 5px 8px; color: #9a5529; background: #fbe9d8; border-radius: 999px; font-size: 10px; white-space: nowrap; }
@@ -149,20 +149,21 @@ h1, h2, h3, p { margin-top: 0; }
 .annotation-action.danger { color: #a6423c; }
 .annotation-notice { min-height: 14px; margin: 9px 1px 0; color: var(--forest-700); font-size: 9px; line-height: 1.4; }
 
-.annotation-editor { position: absolute; z-index: 42; top: 88px; right: 20px; width: min(340px, calc(100% - 40px)); padding: 18px; background: rgba(255,253,246,.98); backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,.9); border-radius: 18px; box-shadow: var(--shadow); }
+.annotation-editor { position: absolute; z-index: 1200; top: 88px; right: 20px; width: min(340px, calc(100% - 40px)); padding: 18px; background: rgba(255,253,246,.98); backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,.9); border-radius: 18px; box-shadow: var(--shadow); }
 .annotation-editor-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
 .annotation-editor-header h2 { margin: 4px 0 0; font-family: Georgia, "Songti SC", serif; font-size: 20px; }
 .annotation-field { display: grid; gap: 6px; margin-bottom: 11px; }
 .annotation-field > span, .annotation-coordinate > span { color: var(--muted); font-size: 10px; }
 .annotation-field em { color: #a6423c; font-style: normal; }
 .annotation-field input, .annotation-field select, .annotation-field textarea { width: 100%; padding: 9px 10px; color: var(--ink); background: white; border: 1px solid var(--line); border-radius: 9px; outline: none; font-size: 11px; }
+.annotation-field select { position: relative; z-index: 1; cursor: pointer; }
 .annotation-field textarea { resize: vertical; line-height: 1.5; }
 .annotation-field input:focus, .annotation-field select:focus, .annotation-field textarea:focus { border-color: rgba(53,107,85,.5); box-shadow: 0 0 0 3px rgba(53,107,85,.1); }
 .annotation-coordinate { display: grid; gap: 5px; padding: 10px; margin: 3px 0 13px; background: #f2f5ee; border-radius: 10px; }
 .annotation-coordinate strong { color: var(--forest-800); font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 10px; line-height: 1.45; word-break: break-all; }
 .annotation-form-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
 
-.detail-panel { position: absolute; z-index: 12; top: 78px; right: 20px; width: 335px; max-height: calc(100% - 116px); overflow: auto; padding: 25px; background: rgba(255,253,246,.96); backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,.7); border-radius: 22px; box-shadow: var(--shadow); transform: translateX(calc(100% + 45px)); opacity: 0; transition: .25s ease; }
+.detail-panel { position: absolute; z-index: 1100; top: 78px; right: 20px; width: 335px; max-height: calc(100% - 116px); overflow: auto; padding: 25px; background: rgba(255,253,246,.96); backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,.7); border-radius: 22px; box-shadow: var(--shadow); transform: translateX(calc(100% + 45px)); opacity: 0; transition: .25s ease; }
 .detail-panel.open { transform: translateX(0); opacity: 1; }
 .detail-close { position: absolute; right: 14px; top: 14px; width: 30px; height: 30px; border: 0; border-radius: 10px; background: var(--sage-150); cursor: pointer; }
 .detail-category { display: inline-flex; padding: 6px 9px; color: white; background: var(--category-color); border-radius: 8px; font-size: 9px; font-weight: 800; }

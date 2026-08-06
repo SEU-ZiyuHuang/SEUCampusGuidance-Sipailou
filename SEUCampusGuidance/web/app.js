@@ -235,6 +235,7 @@
     closeAnnotationEditor();
     renderAnnotationPanel();
     renderMarkers();
+    focusAnnotation(annotation);
     setAnnotationNotice(existing ? "点位已更新。" : "点位已保存，可继续点击地图添加。", false);
     updateAnnotationStatus();
   }
@@ -411,6 +412,16 @@
     }
   }
 
+  function focusAnnotation(annotation) {
+    if (!state.tmap || !annotation) return;
+    if (!Number.isFinite(Number(annotation.lat)) || !Number.isFinite(Number(annotation.lng))) return;
+    const currentZoom = typeof state.tmap.getZoom === "function" ? Number(state.tmap.getZoom()) : 17;
+    state.tmap.easeTo({
+      center: new TMap.LatLng(Number(annotation.lat), Number(annotation.lng)),
+      zoom: Math.max(18, Number.isFinite(currentZoom) ? currentZoom : 17),
+    });
+  }
+
   function renderDetail(feature) {
     const tags = (feature.tags || []).map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("");
     elements.detailContent.innerHTML = `
@@ -580,6 +591,7 @@
       rotation: 0,
     });
     const markerSvg = (color) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 46"><path fill="${color}" stroke="white" stroke-width="3" d="M18 1.5c-9 0-16.5 7.2-16.5 16.2C1.5 30 18 44.5 18 44.5S34.5 30 34.5 17.7C34.5 8.7 27 1.5 18 1.5Z"/><circle cx="18" cy="17.5" r="6" fill="white"/></svg>`)}`;
+    const annotationMarkerSvg = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 60"><path fill="#e26d2e" stroke="white" stroke-width="4" d="M24 2C12.8 2 4 10.4 4 21.4 4 34 24 58 24 58s20-24 20-36.6C44 10.4 35.2 2 24 2Z"/><circle cx="24" cy="21" r="10" fill="white"/><path d="M24 15v12M18 21h12" stroke="#e26d2e" stroke-width="3" stroke-linecap="round"/></svg>`)}`;
     state.tmapMarkers = new TMap.MultiMarker({
       map: state.tmap,
       styles: {
@@ -591,7 +603,7 @@
     state.annotationMarkers = new TMap.MultiMarker({
       map: state.tmap,
       styles: {
-        annotation: new TMap.MarkerStyle({ width: 38, height: 48, anchor: { x: 19, y: 48 }, src: markerSvg("#c2652e") }),
+        annotation: new TMap.MarkerStyle({ width: 48, height: 60, anchor: { x: 24, y: 60 }, src: annotationMarkerSvg }),
       },
       geometries: [],
     });
@@ -690,6 +702,8 @@
     document.querySelector("#guideClose").addEventListener("click", () => elements.guideModal.classList.remove("open"));
     elements.annotationButton.addEventListener("click", toggleAnnotationMode);
     elements.annotationForm.addEventListener("submit", saveAnnotation);
+    elements.annotationEditor.addEventListener("pointerdown", (event) => event.stopPropagation());
+    elements.annotationEditor.addEventListener("click", (event) => event.stopPropagation());
     elements.annotationCancel.addEventListener("click", closeAnnotationEditor);
     elements.annotationFormCancel.addEventListener("click", closeAnnotationEditor);
     elements.annotationExport.addEventListener("click", downloadAnnotations);
