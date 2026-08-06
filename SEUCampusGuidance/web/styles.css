@@ -57,6 +57,7 @@ button { color: inherit; }
 .status-pill.success { color: #dcebcf; background: rgba(141,170,116,.15); border: 1px solid rgba(141,170,116,.28); }
 .ghost-button, .primary-button { height: 38px; padding: 0 15px; border-radius: 12px; cursor: pointer; }
 .ghost-button { color: var(--cream); background: transparent; border: 1px solid rgba(255,255,255,.16); }
+.ghost-button.active { color: var(--forest-950); background: var(--sage-300); border-color: var(--sage-300); }
 .primary-button { color: var(--forest-950); background: var(--sage-300); border: 0; font-weight: 700; }
 
 .workspace { min-height: 0; display: grid; grid-template-columns: 350px 1fr; }
@@ -116,6 +117,9 @@ h1, h2, h3, p { margin-top: 0; }
 .map-marker { position: absolute; pointer-events: auto; transform: translate(-50%,-100%); display: grid; place-items: center; width: 34px; height: 34px; color: white; background: var(--category-color); border: 3px solid rgba(255,255,255,.94); border-radius: 50% 50% 50% 7px; box-shadow: 0 7px 16px rgba(16,45,36,.24); rotate: -45deg; cursor: pointer; transition: .18s ease; }
 .map-marker span { rotate: 45deg; font-size: 9px; font-weight: 900; }
 .map-marker:hover, .map-marker.active { width: 42px; height: 42px; z-index: 5; }
+.map-marker.annotation-marker { width: 37px; height: 37px; background: #c2652e; border-radius: 50% 50% 50% 7px; border-style: dashed; }
+.map-marker.annotation-marker span { font-size: 14px; }
+.map-marker.annotation-marker:hover, .map-marker.annotation-marker.active { width: 44px; height: 44px; }
 .map-watermark { position: absolute; right: 22px; bottom: 22px; display: flex; flex-direction: column; align-items: flex-end; gap: 3px; padding: 10px 13px; color: var(--forest-900); background: rgba(255,253,246,.84); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,.7); border-radius: 12px; box-shadow: 0 8px 18px rgba(16,45,36,.08); }
 .map-watermark strong { font-size: 10px; }
 .map-watermark span { color: var(--muted); font-size: 9px; }
@@ -125,6 +129,38 @@ h1, h2, h3, p { margin-top: 0; }
 .layer-bar { position: absolute; z-index: 7; left: 20px; top: 20px; display: flex; gap: 7px; flex-wrap: wrap; max-width: calc(100% - 95px); }
 .layer-button { padding: 8px 12px; color: var(--forest-900); background: rgba(255,253,246,.87); backdrop-filter: blur(9px); border: 1px solid rgba(255,255,255,.75); border-radius: 11px; box-shadow: 0 6px 15px rgba(16,45,36,.07); font-size: 10px; cursor: pointer; }
 .layer-button.active { color: white; background: var(--forest-800); }
+
+.annotation-panel { position: absolute; z-index: 14; top: 72px; left: 20px; width: min(320px, calc(100% - 40px)); max-height: calc(100% - 94px); overflow: auto; padding: 17px; background: rgba(255,253,246,.96); backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,.85); border-radius: 18px; box-shadow: var(--shadow); }
+.annotation-panel-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.annotation-panel-header strong { display: block; margin-top: 4px; font-family: Georgia, "Songti SC", serif; font-size: 18px; }
+.annotation-count { padding: 5px 8px; color: #9a5529; background: #fbe9d8; border-radius: 999px; font-size: 10px; white-space: nowrap; }
+.annotation-hint { margin: 11px 0 13px; color: var(--muted); font-size: 10px; line-height: 1.55; }
+.annotation-list { display: grid; gap: 7px; }
+.annotation-empty { padding: 13px 10px; color: var(--muted); background: #f2f5ee; border-radius: 11px; font-size: 10px; line-height: 1.55; }
+.annotation-item { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; padding: 9px 10px; background: white; border: 1px solid var(--line); border-radius: 11px; }
+.annotation-item strong { display: block; overflow: hidden; font-size: 11px; white-space: nowrap; text-overflow: ellipsis; }
+.annotation-item small { display: block; margin-top: 3px; color: var(--muted); font-size: 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.annotation-item-actions { display: flex; gap: 4px; }
+.annotation-item-actions button { width: 27px; height: 27px; color: var(--forest-800); background: var(--sage-150); border: 0; border-radius: 8px; cursor: pointer; font-size: 11px; }
+.annotation-item-actions button:last-child { color: #a6423c; background: #f8e8e5; }
+.annotation-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 12px; }
+.annotation-action { min-height: 34px; padding: 7px 8px; color: var(--forest-800); background: white; border: 1px solid var(--line); border-radius: 9px; cursor: pointer; font-size: 10px; }
+.annotation-action.primary { color: white; background: var(--forest-800); border-color: var(--forest-800); }
+.annotation-action.danger { color: #a6423c; }
+.annotation-notice { min-height: 14px; margin: 9px 1px 0; color: var(--forest-700); font-size: 9px; line-height: 1.4; }
+
+.annotation-editor { position: absolute; z-index: 42; top: 88px; right: 20px; width: min(340px, calc(100% - 40px)); padding: 18px; background: rgba(255,253,246,.98); backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,.9); border-radius: 18px; box-shadow: var(--shadow); }
+.annotation-editor-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+.annotation-editor-header h2 { margin: 4px 0 0; font-family: Georgia, "Songti SC", serif; font-size: 20px; }
+.annotation-field { display: grid; gap: 6px; margin-bottom: 11px; }
+.annotation-field > span, .annotation-coordinate > span { color: var(--muted); font-size: 10px; }
+.annotation-field em { color: #a6423c; font-style: normal; }
+.annotation-field input, .annotation-field select, .annotation-field textarea { width: 100%; padding: 9px 10px; color: var(--ink); background: white; border: 1px solid var(--line); border-radius: 9px; outline: none; font-size: 11px; }
+.annotation-field textarea { resize: vertical; line-height: 1.5; }
+.annotation-field input:focus, .annotation-field select:focus, .annotation-field textarea:focus { border-color: rgba(53,107,85,.5); box-shadow: 0 0 0 3px rgba(53,107,85,.1); }
+.annotation-coordinate { display: grid; gap: 5px; padding: 10px; margin: 3px 0 13px; background: #f2f5ee; border-radius: 10px; }
+.annotation-coordinate strong { color: var(--forest-800); font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 10px; line-height: 1.45; word-break: break-all; }
+.annotation-form-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
 
 .detail-panel { position: absolute; z-index: 12; top: 78px; right: 20px; width: 335px; max-height: calc(100% - 116px); overflow: auto; padding: 25px; background: rgba(255,253,246,.96); backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,.7); border-radius: 22px; box-shadow: var(--shadow); transform: translateX(calc(100% + 45px)); opacity: 0; transition: .25s ease; }
 .detail-panel.open { transform: translateX(0); opacity: 1; }
@@ -176,7 +212,7 @@ h1, h2, h3, p { margin-top: 0; }
 
 @media (max-width: 1050px) {
   .topbar { grid-template-columns: 240px 1fr auto; }
-  .status-pill, .ghost-button { display: none; }
+  .status-pill, #guideButton { display: none; }
   .workspace { grid-template-columns: 315px 1fr; }
 }
 
@@ -187,6 +223,9 @@ h1, h2, h3, p { margin-top: 0; }
   .brand small { display: none; }
   .search-wrap { grid-column: 1 / -1; grid-row: 2; }
   .top-actions { grid-column: 2; grid-row: 1; }
+  .annotation-button { width: 43px; padding: 0; overflow: hidden; color: transparent; position: relative; }
+  .annotation-button::after { content: "✎"; position: absolute; inset: 0; display: grid; place-items: center; color: var(--cream); font-size: 17px; }
+  .annotation-button.active::after { color: var(--forest-950); }
   .primary-button { width: 43px; padding: 0; overflow: hidden; color: transparent; position: relative; }
   .primary-button::after { content: "✦"; position: absolute; inset: 0; display: grid; place-items: center; color: var(--forest-950); }
   .workspace { display: block; position: relative; }
@@ -202,6 +241,8 @@ h1, h2, h3, p { margin-top: 0; }
   .map-toolbar { right: 13px; top: 58px; }
   .layer-bar { left: 12px; right: 58px; top: 12px; max-width: none; overflow-x: auto; flex-wrap: nowrap; }
   .layer-button { flex: 0 0 auto; }
+  .annotation-panel { top: 58px; left: 12px; width: min(305px, calc(100% - 70px)); max-height: 38%; }
+  .annotation-editor { top: 74px; right: 12px; left: 12px; width: auto; }
   .detail-panel { left: 10px; right: 10px; top: auto; bottom: 10px; width: auto; max-height: 72%; transform: translateY(calc(100% + 30px)); }
   .detail-panel.open { transform: translateY(0); }
   .guide-gallery { grid-template-columns: 1fr; }
@@ -209,4 +250,3 @@ h1, h2, h3, p { margin-top: 0; }
   .guide-card img { width: 95px; }
   .modal { padding: 12px; }
 }
-

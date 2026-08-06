@@ -25,6 +25,7 @@
         </div>
         <div class="top-actions">
           <span id="dataStatus" class="status-pill warning">演示数据 · 待核准</span>
+          <button id="annotationButton" class="ghost-button annotation-button" type="button">标注地图</button>
           <button id="guideButton" class="ghost-button">原指南</button>
           <button id="agentButton" class="primary-button">问校园 Agent</button>
         </div>
@@ -135,6 +136,67 @@
           </div>
 
           <div id="layerBar" class="layer-bar"></div>
+
+          <section id="annotationPanel" class="annotation-panel" hidden aria-live="polite">
+            <div class="annotation-panel-header">
+              <div>
+                <span class="eyebrow">ANNOTATE</span>
+                <strong>标注地图</strong>
+              </div>
+              <span id="annotationCount" class="annotation-count">0 个</span>
+            </div>
+            <p class="annotation-hint">点击地图上的位置添加点位。保存后可导出 JSON，发回给我用于更新地图。</p>
+            <div id="annotationList" class="annotation-list"></div>
+            <div class="annotation-actions">
+              <button id="annotationExport" class="annotation-action primary" type="button">导出 JSON</button>
+              <button id="annotationCopy" class="annotation-action" type="button">复制 JSON</button>
+              <button id="annotationClear" class="annotation-action danger" type="button">清空</button>
+            </div>
+            <p id="annotationNotice" class="annotation-notice" role="status"></p>
+          </section>
+
+          <section id="annotationEditor" class="annotation-editor" hidden aria-label="编辑地图标注">
+            <div class="annotation-editor-header">
+              <div>
+                <span class="eyebrow">NEW POINT</span>
+                <h2 id="annotationEditorTitle">添加地图点位</h2>
+              </div>
+              <button id="annotationCancel" class="icon-button" type="button" aria-label="取消编辑">×</button>
+            </div>
+            <form id="annotationForm">
+              <label class="annotation-field">
+                <span>名称 <em>*</em></span>
+                <input id="annotationName" name="name" required maxlength="60" autocomplete="off" placeholder="例如：东门门卫室" />
+              </label>
+              <label class="annotation-field">
+                <span>分类</span>
+                <select id="annotationCategory" name="category">
+                  <option value="all">其他</option>
+                  <option value="study">学习空间</option>
+                  <option value="dining">食堂餐饮</option>
+                  <option value="dorm">宿舍生活</option>
+                  <option value="office">行政办事</option>
+                  <option value="sports">运动场馆</option>
+                  <option value="service">生活服务</option>
+                  <option value="medical">医疗急救</option>
+                  <option value="transport">交通出行</option>
+                  <option value="nearby">校园周边</option>
+                </select>
+              </label>
+              <label class="annotation-field">
+                <span>备注</span>
+                <textarea id="annotationDescription" name="description" rows="3" maxlength="240" placeholder="入口、楼层、开放时间或需要核验的信息"></textarea>
+              </label>
+              <div class="annotation-coordinate">
+                <span>点击坐标</span>
+                <strong id="annotationCoordinate">等待选择地图位置</strong>
+              </div>
+              <div class="annotation-form-actions">
+                <button id="annotationSave" class="annotation-action primary" type="submit">保存点位</button>
+                <button id="annotationFormCancel" class="annotation-action" type="button">取消</button>
+              </div>
+            </form>
+          </section>
 
           <section id="detailPanel" class="detail-panel" aria-live="polite">
             <button id="detailClose" class="detail-close" aria-label="关闭详情">×</button>
