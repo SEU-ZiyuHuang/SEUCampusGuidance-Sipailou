@@ -16,3 +16,10 @@ async function copySharedDirectory(name) {
 
 await copySharedDirectory("data");
 await copySharedDirectory("原校区指南");
+
+// This file is useful for opening index.html directly on a local machine, but
+// production must use the environment-backed /api/runtime-config rewrite.
+if (process.env.VERCEL) {
+  await fs.rm(path.join(webDir, "runtime-config.js"), { force: true });
+  console.log("[vercel-build] removed local runtime-config.js in favor of the API route");
+}
