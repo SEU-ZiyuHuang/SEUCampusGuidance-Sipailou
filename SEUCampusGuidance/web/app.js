@@ -58,9 +58,24 @@
     dataStatus: document.querySelector("#dataStatus"),
   };
 
+  const manualPoi = Array.isArray(window.MANUAL_POI) ? window.MANUAL_POI : [];
+  const manualReplacements = new Map(manualPoi.filter((feature) => feature.replacesId).map((feature) => [feature.replacesId, feature]));
+  const mergedFeatures = window.MAP_FEATURES.map((feature) => {
+    const replacement = manualReplacements.get(feature.id);
+    return replacement ? { ...feature, ...replacement, id: feature.id } : feature;
+  });
+  window.MAP_FEATURES = [
+    ...mergedFeatures,
+    ...manualPoi.filter((feature) => !feature.replacesId),
+  ];
+
   const themeById = Object.fromEntries(window.MAP_THEMES.map((theme) => [theme.id, theme]));
   const featureById = Object.fromEntries(window.MAP_FEATURES.map((feature) => [feature.id, feature]));
-  const toTencentCoordinate = (latitude, longitude) => window.CampusCoordinates.wgs84ToGcj02(latitude, longitude);
+  const toTencentCoordinate = (latitude, longitude, coordinateSystem = "WGS84") => (
+    coordinateSystem === "GCJ-02"
+      ? { latitude, longitude }
+      : window.CampusCoordinates.wgs84ToGcj02(latitude, longitude)
+  );
   const sheetCategory = {
     "宿舍信息": "dorm", "食堂信息": "dining", "图书馆与学习设施": "study",
     "行政窗口": "office", "交通信息": "transport", "周边餐饮": "nearby",
@@ -407,7 +422,7 @@
     renderResults();
     renderDetail(feature);
     if (state.tmap && !feature.knowledgeOnly) {
-      const coordinate = toTencentCoordinate(feature.lat, feature.lng);
+      const coordinate = toTencentCoordinate(feature.lat, feature.lng, feature.coordinateSystem);
       state.tmap.easeTo({ center: new TMap.LatLng(coordinate.latitude, coordinate.longitude), zoom: 18 });
     }
   }
@@ -541,7 +556,7 @@
   function updateTencentMarkers(visibleIds) {
     if (!state.tmapMarkers || !window.TMap) return;
     const geometries = window.MAP_FEATURES.filter((feature) => visibleIds.has(feature.id)).map((feature) => {
-      const coordinate = toTencentCoordinate(feature.lat, feature.lng);
+      const coordinate = toTencentCoordinate(feature.lat, feature.lng, feature.coordinateSystem);
       return {
         id: feature.id,
         styleId: feature.category === "medical" ? "alert" : "default",
