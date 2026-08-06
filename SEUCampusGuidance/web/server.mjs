@@ -4,6 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
+const projectDir = path.resolve(rootDir, "..");
 const port = Number(process.env.PORT || 5173);
 const host = process.env.HOST || "127.0.0.1";
 const mapKey = process.env.TENCENT_MAP_KEY || "";
@@ -64,17 +65,23 @@ async function serveStatic(request, response) {
   }
   let pathname = decodeURIComponent(requestUrl.pathname);
   if (pathname === "/") pathname = "/index.html";
-  const absolutePath = path.resolve(rootDir, `.${pathname}`);
-  if (!absolutePath.startsWith(rootDir + path.sep)) return sendJson(response, 403, { error: "Forbidden" });
-  try {
-    const stat = await fs.stat(absolutePath);
-    const filePath = stat.isDirectory() ? path.join(absolutePath, "index.html") : absolutePath;
-    const file = await fs.readFile(filePath);
-    response.writeHead(200, { "Content-Type": mimeTypes[path.extname(filePath).toLowerCase()] || "application/octet-stream" });
-    response.end(file);
-  } catch {
-    sendJson(response, 404, { error: "Not found" });
+  const sharedPath = pathname.startsWith("/data/") || pathname.startsWith("/原校区指南/");
+  const searchRoots = sharedPath ? [rootDir, projectDir] : [rootDir];
+  for (const baseDir of searchRoots) {
+    const absolutePath = path.resolve(baseDir, `.${pathname}`);
+    if (!absolutePath.startsWith(baseDir + path.sep)) continue;
+    try {
+      const stat = await fs.stat(absolutePath);
+      const filePath = stat.isDirectory() ? path.join(absolutePath, "index.html") : absolutePath;
+      const file = await fs.readFile(filePath);
+      response.writeHead(200, { "Content-Type": mimeTypes[path.extname(filePath).toLowerCase()] || "application/octet-stream" });
+      response.end(file);
+      return;
+    } catch {
+      // Try the shared source directory when the Vercel build copy is absent locally.
+    }
   }
+  sendJson(response, 404, { error: "Not found" });
 }
 
 const server = http.createServer(async (request, response) => {

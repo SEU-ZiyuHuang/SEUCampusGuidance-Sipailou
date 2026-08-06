@@ -6,4 +6,6 @@ config.local.js
 .vercel/
 .DS_Store
 outputs/
+/data/
+/原校区指南/
 *.xlsx
