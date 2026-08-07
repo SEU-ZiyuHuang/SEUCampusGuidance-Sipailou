@@ -16,6 +16,7 @@
     annotationMode: false,
     editingAnnotationId: null,
     pendingAnnotationCoordinate: null,
+    editingCoordinateId: null,
   };
 
   const elements = {
@@ -45,6 +46,15 @@
     annotationCoordinate: document.querySelector("#annotationCoordinate"),
     annotationCancel: document.querySelector("#annotationCancel"),
     annotationFormCancel: document.querySelector("#annotationFormCancel"),
+    coordinateEditor: document.querySelector("#coordinateEditor"),
+    coordinateEditorTitle: document.querySelector("#coordinateEditorTitle"),
+    coordinateForm: document.querySelector("#coordinateForm"),
+    coordinateFeatureName: document.querySelector("#coordinateFeatureName"),
+    coordinateLatitude: document.querySelector("#coordinateLatitude"),
+    coordinateLongitude: document.querySelector("#coordinateLongitude"),
+    coordinateSystem: document.querySelector("#coordinateSystem"),
+    coordinateCancel: document.querySelector("#coordinateCancel"),
+    coordinateFormCancel: document.querySelector("#coordinateFormCancel"),
     detailPanel: document.querySelector("#detailPanel"),
     detailContent: document.querySelector("#detailContent"),
     agentDrawer: document.querySelector("#agentDrawer"),
@@ -61,6 +71,20 @@
 
   const manualPoi = Array.isArray(window.MANUAL_POI) ? window.MANUAL_POI : [];
   const importedAnnotations = Array.isArray(window.IMPORTED_ANNOTATIONS) ? window.IMPORTED_ANNOTATIONS : [];
+  const featureCoordinateStorageKey = "seu-campus-map-coordinate-overrides-v1";
+
+  function readFeatureCoordinateOverrides() {
+    try {
+      const raw = window.localStorage.getItem(featureCoordinateStorageKey);
+      const parsed = raw ? JSON.parse(raw) : {};
+      return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+    } catch (error) {
+      console.warn("无法读取点位坐标修正数据。", error);
+      return {};
+    }
+  }
+
+  const featureCoordinateOverrides = readFeatureCoordinateOverrides();
   const manualReplacements = [
     ...manualPoi.filter((feature) => feature.replacesId),
     ...importedAnnotations.filter((feature) => feature.replacesId),
@@ -80,7 +104,9 @@
     ...mergedFeatures,
     ...manualPoi.filter((feature) => !feature.replacesId),
     ...importedAnnotations.filter((feature) => !feature.replacesId),
-  ];
+  ].map((feature) => featureCoordinateOverrides[feature.id]
+    ? { ...feature, ...featureCoordinateOverrides[feature.id], id: feature.id }
+    : feature);
 
   const themeById = Object.fromEntries(window.MAP_THEMES.map((theme) => [theme.id, theme]));
   const featureById = Object.fromEntries(window.MAP_FEATURES.map((feature) => [feature.id, feature]));
@@ -134,6 +160,29 @@
       setAnnotationNotice("浏览器未允许本地保存；仍可导出当前标注。", true);
       console.warn("无法保存本地标注数据。", error);
     }
+  }
+
+  function persistFeatureCoordinateOverrides() {
+    try {
+      window.localStorage.setItem(featureCoordinateStorageKey, JSON.stringify(featureCoordinateOverrides));
+    } catch (error) {
+      setAnnotationNotice("浏览器未允许本地保存坐标修正；当前页面仍会继续显示。", true);
+      console.warn("无法保存点位坐标修正数据。", error);
+    }
+  }
+
+  function fallbackPositionFromCoordinate(latitude, longitude, coordinateSystem) {
+    const point = coordinateSystem === "GCJ-02"
+      ? { latitude, longitude }
+      : toTencentCoordinate(latitude, longitude, coordinateSystem || "WGS84");
+    const west = 118.7805;
+    const east = 118.7995;
+    const north = 32.0635;
+    const south = 32.048;
+    return {
+      x: Math.max(0, Math.min(100, ((point.longitude - west) / (east - west)) * 100)),
+      y: Math.max(0, Math.min(100, ((north - point.latitude) / (north - south)) * 100)),
+    };
   }
 
   function setAnnotationNotice(message, isWarning = false) {
@@ -261,6 +310,90 @@
     renderMarkers();
   }
 
+  function formatFeatureCoordinate(feature) {
+    if (!Number.isFinite(Number(feature?.lat)) || !Number.isFinite(Number(feature?.lng))) return "坐标待补充";
+    const coordinateSystem = feature.coordinateSystem || "WGS84";
+    return `${Number(feature.lat).toFixed(6)}, ${Number(feature.lng).toFixed(6)}（${coordinateSystem}）`;
+  }
+
+  function coordinateTarget(id) {
+    const annotation = state.annotations.find((item) => item.id === id);
+    if (annotation) return { kind: "annotation", value: annotation };
+    const feature = featureById[id];
+    return feature ? { kind: "feature", value: feature } : null;
+  }
+
+  function openCoordinateEditor(id) {
+    const target = coordinateTarget(id);
+    const feature = target?.value;
+    if (!feature || !elements.coordinateEditor) return;
+    if (!Number.isFinite(Number(feature.lat)) || !Number.isFinite(Number(feature.lng))) {
+      setAnnotationNotice("这个点位还没有经纬度，暂时不能通过经纬度修正。", true);
+      return;
+    }
+    state.editingCoordinateId = id;
+    elements.coordinateEditorTitle.textContent = "修改点位坐标";
+    elements.coordinateFeatureName.textContent = feature.name;
+    elements.coordinateLatitude.value = Number(feature.lat).toFixed(8);
+    elements.coordinateLongitude.value = Number(feature.lng).toFixed(8);
+    elements.coordinateSystem.value = feature.coordinateSystem === "GCJ-02" ? "GCJ-02" : "WGS84";
+    elements.coordinateEditor.hidden = false;
+    elements.detailPanel?.classList.remove("open");
+    window.setTimeout(() => elements.coordinateLatitude.focus(), 0);
+  }
+
+  function closeCoordinateEditor() {
+    state.editingCoordinateId = null;
+    if (elements.coordinateEditor) elements.coordinateEditor.hidden = true;
+  }
+
+  function saveCoordinate(event) {
+    event.preventDefault();
+    const target = coordinateTarget(state.editingCoordinateId);
+    const latitude = Number(elements.coordinateLatitude.value);
+    const longitude = Number(elements.coordinateLongitude.value);
+    if (!target || !Number.isFinite(latitude) || latitude < -90 || latitude > 90) {
+      elements.coordinateLatitude.reportValidity();
+      return;
+    }
+    if (!Number.isFinite(longitude) || longitude < -180 || longitude > 180) {
+      elements.coordinateLongitude.reportValidity();
+      return;
+    }
+    const coordinateSystem = elements.coordinateSystem.value === "GCJ-02" ? "GCJ-02" : "WGS84";
+    const fallback = fallbackPositionFromCoordinate(latitude, longitude, coordinateSystem);
+    const coordinate = {
+      lat: latitude,
+      lng: longitude,
+      coordinateSystem,
+      x: fallback.x,
+      y: fallback.y,
+      updatedAt: new Date().toISOString(),
+    };
+    Object.assign(target.value, coordinate);
+    closeCoordinateEditor();
+    if (target.kind === "annotation") {
+      state.selectedAnnotationId = target.value.id;
+      persistAnnotations();
+      renderAnnotationPanel();
+      renderMarkers();
+      renderDetail(annotationAsFeature(target.value));
+      focusAnnotation(target.value);
+    } else {
+      state.selectedId = target.value.id;
+      state.selectedAnnotationId = null;
+      featureCoordinateOverrides[target.value.id] = { ...coordinate };
+      persistFeatureCoordinateOverrides();
+      renderMarkers();
+      renderDetail(target.value);
+      if (state.tmap) {
+        const mapCoordinate = toTencentCoordinate(latitude, longitude, coordinateSystem);
+        state.tmap.easeTo({ center: new TMap.LatLng(mapCoordinate.latitude, mapCoordinate.longitude), zoom: 18 });
+      }
+    }
+    setAnnotationNotice("点位坐标已更新。", false);
+  }
+
   function saveAnnotation(event) {
     event.preventDefault();
     if (!elements.annotationName.value.trim()) {
@@ -329,6 +462,10 @@
       exportedAt: new Date().toISOString(),
       existingMapFeatureCount: window.MAP_FEATURES.length,
       annotations: state.annotations.map((annotation) => ({ ...annotation })),
+      coordinateOverrides: Object.entries(featureCoordinateOverrides).map(([featureId, coordinate]) => ({
+        featureId,
+        ...coordinate,
+      })),
     };
   }
 
@@ -500,6 +637,9 @@
 
   function renderDetail(feature) {
     const tags = (feature.tags || []).map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("");
+    const hasEditableCoordinate = !feature.knowledgeOnly
+      && Number.isFinite(Number(feature.lat))
+      && Number.isFinite(Number(feature.lng));
     elements.detailContent.innerHTML = `
       <span class="detail-category" style="--category-color:${categoryColor(feature.category)}">${escapeHtml((themeById[feature.category] || themeById.all).label)}</span>
       <h2>${escapeHtml(feature.name)}</h2>
@@ -508,9 +648,11 @@
       <div class="detail-grid"><span>开放时间</span><strong>${escapeHtml(feature.hours)}</strong></div>
       <div class="detail-grid"><span>状态</span><span>${statusLabel(feature.status)}（规则推测）</span></div>
       <div class="detail-grid"><span>相关标签</span><div class="tag-list">${tags}</div></div>
+      ${hasEditableCoordinate ? `<div class="detail-grid"><span>地图坐标</span><strong>${escapeHtml(formatFeatureCoordinate(feature))}</strong></div>` : ""}
       <div class="detail-actions">
         <button class="route-button" data-detail-action="route" ${feature.knowledgeOnly ? "disabled" : ""}>到这里去</button>
         <button class="ask-button" data-detail-action="ask">继续问 Agent</button>
+        ${hasEditableCoordinate ? `<button class="coordinate-button" data-detail-action="edit-coordinate">修改经纬度</button>` : ""}
       </div>
       <div class="verification">⚠ Demo 推测数据 · 坐标、入口和开放状态等待人工标注</div>
     `;
@@ -771,7 +913,7 @@
     });
     document.addEventListener("keydown", (event) => {
       if (event.key === "/" && document.activeElement !== elements.searchInput) { event.preventDefault(); elements.searchInput.focus(); }
-      if (event.key === "Escape") { closeDetail(); closeAnnotationEditor(); elements.agentDrawer.classList.remove("open"); elements.guideModal.classList.remove("open"); }
+      if (event.key === "Escape") { closeDetail(); closeAnnotationEditor(); closeCoordinateEditor(); elements.agentDrawer.classList.remove("open"); elements.guideModal.classList.remove("open"); }
     });
     document.querySelectorAll(".filter-chip").forEach((button) => button.addEventListener("click", () => {
       document.querySelectorAll(".filter-chip").forEach((item) => item.classList.remove("active"));
@@ -786,10 +928,13 @@
     document.querySelector("#guideClose").addEventListener("click", () => elements.guideModal.classList.remove("open"));
     elements.annotationButton.addEventListener("click", toggleAnnotationMode);
     elements.annotationForm.addEventListener("submit", saveAnnotation);
+    elements.coordinateForm.addEventListener("submit", saveCoordinate);
     elements.annotationEditor.addEventListener("pointerdown", (event) => event.stopPropagation());
     elements.annotationEditor.addEventListener("click", (event) => event.stopPropagation());
     elements.annotationCancel.addEventListener("click", closeAnnotationEditor);
     elements.annotationFormCancel.addEventListener("click", closeAnnotationEditor);
+    elements.coordinateCancel.addEventListener("click", closeCoordinateEditor);
+    elements.coordinateFormCancel.addEventListener("click", closeCoordinateEditor);
     elements.annotationExport.addEventListener("click", downloadAnnotations);
     elements.annotationCopy.addEventListener("click", copyAnnotations);
     elements.annotationClear.addEventListener("click", () => {
@@ -815,6 +960,10 @@
       const annotation = state.annotations.find((item) => item.id === state.selectedAnnotationId);
       if (!annotation) return;
       event.stopImmediatePropagation();
+      if (action === "edit-coordinate") {
+        openCoordinateEditor(annotation.id);
+        return;
+      }
       if (action === "ask") openAgent(`请介绍新增地点：${annotation.name}`);
       if (action === "route") {
         if (state.tmap && Number.isFinite(Number(annotation.lat)) && Number.isFinite(Number(annotation.lng))) focusAnnotation(annotation);
@@ -823,6 +972,7 @@
     });
     elements.detailPanel.addEventListener("click", (event) => {
       const action = event.target.closest("[data-detail-action]")?.dataset.detailAction;
+      if (action === "edit-coordinate") openCoordinateEditor(state.selectedId);
       if (action === "ask") openAgent(`请介绍一下${resolveFeature(state.selectedId, !featureById[state.selectedId])?.name || "这个地点"}`);
       if (action === "route") openAgent(`从我当前位置怎么去${featureById[state.selectedId]?.name || "这里"}？`);
     });

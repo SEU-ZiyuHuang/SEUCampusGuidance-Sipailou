@@ -198,6 +198,42 @@
             </form>
           </section>
 
+          <section id="coordinateEditor" class="annotation-editor coordinate-editor" hidden aria-label="修改地点坐标">
+            <div class="annotation-editor-header">
+              <div>
+                <span class="eyebrow">COORDINATES</span>
+                <h2 id="coordinateEditorTitle">修改点位坐标</h2>
+              </div>
+              <button id="coordinateCancel" class="icon-button" type="button" aria-label="取消坐标编辑">×</button>
+            </div>
+            <p id="coordinateFeatureName" class="coordinate-feature-name"></p>
+            <form id="coordinateForm">
+              <label class="annotation-field">
+                <span>纬度 Latitude <em>*</em></span>
+                <input id="coordinateLatitude" name="latitude" type="number" min="-90" max="90" step="0.00000001" required inputmode="decimal" />
+              </label>
+              <label class="annotation-field">
+                <span>经度 Longitude <em>*</em></span>
+                <input id="coordinateLongitude" name="longitude" type="number" min="-180" max="180" step="0.00000001" required inputmode="decimal" />
+              </label>
+              <label class="annotation-field">
+                <span>坐标系</span>
+                <select id="coordinateSystem" name="coordinateSystem">
+                  <option value="GCJ-02">GCJ-02（腾讯地图）</option>
+                  <option value="WGS84">WGS84（GPS/经纬度）</option>
+                </select>
+              </label>
+              <div class="annotation-coordinate">
+                <span>说明</span>
+                <strong>腾讯地图点选结果请选择 GCJ-02；GPS 设备结果通常选择 WGS84。</strong>
+              </div>
+              <div class="annotation-form-actions">
+                <button id="coordinateSave" class="annotation-action primary" type="submit">保存坐标</button>
+                <button id="coordinateFormCancel" class="annotation-action" type="button">取消</button>
+              </div>
+            </form>
+          </section>
+
           <section id="detailPanel" class="detail-panel" aria-live="polite">
             <button id="detailClose" class="detail-close" aria-label="关闭详情">×</button>
             <div id="detailContent"></div>

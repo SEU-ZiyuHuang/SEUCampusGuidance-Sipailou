@@ -152,6 +152,7 @@ h1, h2, h3, p { margin-top: 0; }
 .annotation-editor { position: absolute; z-index: 1200; top: 88px; right: 20px; width: min(340px, calc(100% - 40px)); padding: 18px; background: rgba(255,253,246,.98); backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,.9); border-radius: 18px; box-shadow: var(--shadow); }
 .annotation-editor-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
 .annotation-editor-header h2 { margin: 4px 0 0; font-family: Georgia, "Songti SC", serif; font-size: 20px; }
+.coordinate-feature-name { margin: -4px 0 15px; color: var(--forest-800); font-size: 12px; font-weight: 800; }
 .annotation-field { display: grid; gap: 6px; margin-bottom: 11px; }
 .annotation-field > span, .annotation-coordinate > span { color: var(--muted); font-size: 10px; }
 .annotation-field em { color: #a6423c; font-style: normal; }
@@ -178,6 +179,7 @@ h1, h2, h3, p { margin-top: 0; }
 .detail-actions button { height: 39px; border-radius: 11px; cursor: pointer; }
 .route-button { color: white; background: var(--forest-800); border: 0; }
 .ask-button { background: white; border: 1px solid var(--line); }
+.coordinate-button { grid-column: 1 / -1; color: var(--forest-800); background: var(--sage-150); border: 1px solid var(--line); }
 .verification { margin-top: 14px; color: #9b7246; font-size: 9px; }
 
 .agent-drawer { position: fixed; z-index: 60; top: 0; right: 0; width: min(430px, 100vw); height: 100vh; display: grid; grid-template-rows: 75px 1fr auto auto auto; padding: 0 18px 14px; background: var(--paper); box-shadow: -25px 0 70px rgba(16,45,36,.2); transform: translateX(105%); transition: .28s ease; }
