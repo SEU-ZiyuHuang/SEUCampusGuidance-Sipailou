@@ -12,6 +12,7 @@
     tmapMarkers: null,
     annotationMarkers: null,
     annotations: [],
+    selectedAnnotationId: null,
     annotationMode: false,
     editingAnnotationId: null,
     pendingAnnotationCoordinate: null,
@@ -115,11 +116,6 @@
     return selected ? `${baseId}-selected` : baseId;
   }
 
-  function annotationMarkerStyleId(category, selected = false) {
-    const baseId = markerStyleId(category, false);
-    return selected ? `${baseId}-annotation-selected` : `${baseId}-annotation`;
-  }
-
   function loadAnnotations() {
     try {
       const raw = window.localStorage.getItem(annotationStorageKey);
@@ -212,10 +208,41 @@
     return null;
   }
 
+  function annotationAsFeature(annotation) {
+    const theme = themeById[annotation?.category] || themeById.all;
+    return {
+      id: annotation.id,
+      name: annotation.name,
+      category: theme.id,
+      icon: theme.icon,
+      lat: annotation.lat,
+      lng: annotation.lng,
+      coordinateSystem: annotation.coordinateSystem,
+      location: formatAnnotationCoordinate(annotation),
+      hours: "用户标注",
+      status: "unknown",
+      tags: ["人工标注"],
+      description: annotation.description || "这是一个用户新增的地点，详细信息待补充。",
+      knowledgeOnly: false,
+    };
+  }
+
+  function selectAnnotation(annotation) {
+    if (!annotation) return;
+    state.selectedAnnotationId = annotation.id;
+    state.selectedId = null;
+    renderMarkers();
+    renderDetail(annotationAsFeature(annotation));
+    focusAnnotation(annotation);
+  }
+
   function openAnnotationEditor(coordinate, annotationId = null) {
     if (!state.annotationMode || !elements.annotationEditor) return;
     const existing = annotationId ? state.annotations.find((item) => item.id === annotationId) : null;
     state.editingAnnotationId = existing?.id || null;
+    state.selectedAnnotationId = null;
+    state.selectedId = null;
+    elements.detailPanel?.classList.remove("open");
     state.pendingAnnotationCoordinate = coordinate || annotationCoordinate(existing);
     elements.annotationEditorTitle.textContent = existing ? "编辑地图点位" : "添加地图点位";
     elements.annotationName.value = existing?.name || "";
@@ -248,7 +275,7 @@
       id: existing?.id || `annotation-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       name: elements.annotationName.value.trim(),
       category: elements.annotationCategory.value || "all",
-      icon: "标",
+      icon: (themeById[elements.annotationCategory.value] || themeById.all).icon,
       description: elements.annotationDescription.value.trim() || "用户现场标注，详情待补充。",
       source: "user",
       updatedAt: now,
@@ -267,6 +294,7 @@
         lng: undefined,
       }),
     };
+    annotation.icon = (themeById[annotation.category] || themeById.all).icon;
     Object.keys(annotation).forEach((key) => annotation[key] === undefined && delete annotation[key]);
     state.annotations = existing
       ? state.annotations.map((item) => item.id === existing.id ? annotation : item)
@@ -434,6 +462,9 @@
     state.annotations.forEach((annotation) => {
       const marker = elements.markers.querySelector(`[data-annotation-id="${CSS.escape(String(annotation.id))}"]`);
       marker?.style.setProperty("--category-color", categoryColor(annotation.category));
+      marker?.classList.toggle("active", state.editingAnnotationId === annotation.id || state.selectedAnnotationId === annotation.id);
+      const theme = themeById[annotation.category] || themeById.all;
+      if (marker?.querySelector("span")) marker.querySelector("span").textContent = theme.icon;
     });
     updateTencentMarkers(visibleIds);
   }
@@ -447,6 +478,7 @@
   function selectFeature(id, isKnowledge = false) {
     const feature = resolveFeature(id, isKnowledge);
     if (!feature) return;
+    state.selectedAnnotationId = null;
     state.selectedId = id;
     renderResults();
     renderDetail(feature);
@@ -487,6 +519,7 @@
 
   function closeDetail() {
     state.selectedId = null;
+    state.selectedAnnotationId = null;
     elements.detailPanel.classList.remove("open");
     renderResults();
   }
@@ -600,7 +633,7 @@
         .filter((annotation) => Number.isFinite(Number(annotation.lat)) && Number.isFinite(Number(annotation.lng)))
         .map((annotation) => ({
           id: annotation.id,
-          styleId: annotationMarkerStyleId(annotation.category, state.editingAnnotationId === annotation.id),
+          styleId: markerStyleId(annotation.category, state.editingAnnotationId === annotation.id || state.selectedAnnotationId === annotation.id),
           position: new TMap.LatLng(Number(annotation.lat), Number(annotation.lng)),
           properties: { title: annotation.name },
         }));
@@ -637,16 +670,11 @@
     });
     const markerSvg = (color) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 46"><path fill="${color}" stroke="white" stroke-width="3" d="M18 1.5c-9 0-16.5 7.2-16.5 16.2C1.5 30 18 44.5 18 44.5S34.5 30 34.5 17.7C34.5 8.7 27 1.5 18 1.5Z"/><circle cx="18" cy="17.5" r="6" fill="white"/></svg>`)}`;
     const selectedMarkerSvg = (color) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 64"><circle cx="26" cy="27" r="24" fill="${color}" opacity=".18"/><circle cx="26" cy="27" r="19" fill="white" opacity=".88"/><path fill="${color}" stroke="white" stroke-width="3.5" d="M26 2.5C13.7 2.5 3.5 12.1 3.5 24.2 3.5 38.2 26 61 26 61s22.5-22.8 22.5-36.8C48.5 12.1 38.3 2.5 26 2.5Z"/><circle cx="26" cy="24" r="7.5" fill="white"/></svg>`)}`;
-    const annotationMarkerSvg = (color) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 60"><path fill="${color}" stroke="white" stroke-width="4" d="M24 2C12.8 2 4 10.4 4 21.4 4 34 24 58 24 58s20-24 20-36.6C44 10.4 35.2 2 24 2Z"/><circle cx="24" cy="21" r="10" fill="white"/><path d="M24 15v12M18 21h12" stroke="${color}" stroke-width="3" stroke-linecap="round"/></svg>`)}`;
-    const selectedAnnotationMarkerSvg = (color) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 68"><circle cx="28" cy="27" r="26" fill="${color}" opacity=".2"/><path fill="${color}" stroke="white" stroke-width="4.5" d="M28 2C14.8 2 4.5 11.8 4.5 24.5 4.5 39 28 65 28 65s23.5-26 23.5-40.5C51.5 11.8 41.2 2 28 2Z"/><circle cx="28" cy="25" r="11" fill="white"/><path d="M28 18v14M21 25h14" stroke="${color}" stroke-width="3.5" stroke-linecap="round"/></svg>`)}`;
     const markerStyles = {};
-    const annotationStyles = {};
     window.MAP_THEMES.forEach((theme) => {
       const baseId = theme.id === "all" ? "default" : theme.id;
       markerStyles[baseId] = new TMap.MarkerStyle({ width: 36, height: 46, anchor: { x: 18, y: 46 }, src: markerSvg(theme.color) });
       markerStyles[`${baseId}-selected`] = new TMap.MarkerStyle({ width: 52, height: 64, anchor: { x: 26, y: 64 }, src: selectedMarkerSvg(theme.color) });
-      annotationStyles[`${baseId}-annotation`] = new TMap.MarkerStyle({ width: 48, height: 60, anchor: { x: 24, y: 60 }, src: annotationMarkerSvg(theme.color) });
-      annotationStyles[`${baseId}-annotation-selected`] = new TMap.MarkerStyle({ width: 56, height: 68, anchor: { x: 28, y: 68 }, src: selectedAnnotationMarkerSvg(theme.color) });
     });
     state.tmapMarkers = new TMap.MultiMarker({
       map: state.tmap,
@@ -655,7 +683,7 @@
     });
     state.annotationMarkers = new TMap.MultiMarker({
       map: state.tmap,
-      styles: annotationStyles,
+      styles: markerStyles,
       geometries: [],
     });
     state.tmapMarkers.on("click", (event) => {
@@ -664,7 +692,10 @@
     });
     state.annotationMarkers.on("click", (event) => {
       const id = event?.geometry?.id;
-      if (id) openAnnotationEditor(annotationCoordinate(state.annotations.find((annotation) => annotation.id === id)), id);
+      const annotation = state.annotations.find((item) => item.id === id);
+      if (!annotation) return;
+      if (state.annotationMode) openAnnotationEditor(annotationCoordinate(annotation), id);
+      else selectAnnotation(annotation);
     });
     state.tmap.on("click", (event) => {
       if (!state.annotationMode) return;
@@ -713,7 +744,9 @@
       const annotationMarker = event.target.closest("[data-annotation-id]");
       if (annotationMarker) {
         event.stopPropagation();
-        openAnnotationEditor(annotationCoordinate(state.annotations.find((annotation) => annotation.id === annotationMarker.dataset.annotationId)), annotationMarker.dataset.annotationId);
+        const annotation = state.annotations.find((item) => item.id === annotationMarker.dataset.annotationId);
+        if (state.annotationMode) openAnnotationEditor(annotationCoordinate(annotation), annotationMarker.dataset.annotationId);
+        else selectAnnotation(annotation);
         return;
       }
       const themeButton = event.target.closest("[data-theme]");
@@ -775,6 +808,19 @@
     });
     elements.guideModal.addEventListener("click", (event) => { if (event.target === elements.guideModal) elements.guideModal.classList.remove("open"); });
     document.querySelector("#mobileCollapse").addEventListener("click", () => elements.sidebar.classList.toggle("collapsed"));
+    elements.detailPanel.addEventListener("click", (event) => {
+      if (!state.selectedAnnotationId) return;
+      const action = event.target.closest("[data-detail-action]")?.dataset.detailAction;
+      if (!action) return;
+      const annotation = state.annotations.find((item) => item.id === state.selectedAnnotationId);
+      if (!annotation) return;
+      event.stopImmediatePropagation();
+      if (action === "ask") openAgent(`请介绍新增地点：${annotation.name}`);
+      if (action === "route") {
+        if (state.tmap && Number.isFinite(Number(annotation.lat)) && Number.isFinite(Number(annotation.lng))) focusAnnotation(annotation);
+        else openAgent(`如何前往新增地点：${annotation.name}`);
+      }
+    });
     elements.detailPanel.addEventListener("click", (event) => {
       const action = event.target.closest("[data-detail-action]")?.dataset.detailAction;
       if (action === "ask") openAgent(`请介绍一下${resolveFeature(state.selectedId, !featureById[state.selectedId])?.name || "这个地点"}`);
